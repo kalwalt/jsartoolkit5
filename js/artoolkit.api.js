@@ -1,7 +1,13 @@
 ;(function() {
 	'use strict';
 
-	if(window.artoolkit_wasm_url) {
+	var scope;
+	if (typeof window !== 'undefined') {
+		scope = window;
+	} else {
+		scope = self;
+	}
+	if(scope.artoolkit_wasm_url) {
          function downloadWasm(url) {
              return new Promise(function(resolve, reject) {
              var wasmXHR = new XMLHttpRequest();
@@ -13,7 +19,7 @@
              });
          }
 
-          var wasm = downloadWasm(window.artoolkit_wasm_url);
+          var wasm = downloadWasm(scope.artoolkit_wasm_url);
 
           // Module.instantiateWasm is a user-implemented callback which the Emscripten runtime calls to perform
          // the WebAssembly instantiation action. The callback function will be called with two parameters, imports
@@ -536,6 +542,7 @@
 	*/
 	ARController.prototype.loadNFTMarker = function(markerURL, onSuccess, onError) {
 		var self = this;
+		this._setupAR2Threads();
 		return artoolkit.addNFTMarker(this.id, markerURL, function(id) {
 			self.nftMarkerCount = id + 1;
 			onSuccess(id);
@@ -1229,6 +1236,10 @@ ARController.prototype.arglCameraViewRHf = function(glMatrix, glRhMatrix, scale)
 		artoolkit.setupAR2(this.id);
 	};
 
+	ARController.prototype._setupAR2Threads = function() {
+		artoolkit.setupAR2Threads(this.id);
+	};
+
 	ARController.prototype._copyImageToHeap = function(image) {
 		if (!image) {
 			image = this.image;
@@ -1686,6 +1697,7 @@ ARController.prototype.arglCameraViewRHf = function(glMatrix, glRhMatrix, scale)
 		'teardown',
 
 		'setupAR2',
+		'setupAR2Threads',
 
 		'setLogLevel',
 		'getLogLevel',
@@ -1919,22 +1931,22 @@ ARController.prototype.arglCameraViewRHf = function(glMatrix, glRhMatrix, scale)
 	}
 
 	/* Exports */
-	window.artoolkit = artoolkit;
-	window.ARController = ARController;
-	window.ARCameraParam = ARCameraParam;
+	scope.artoolkit = artoolkit;
+	scope.ARController = ARController;
+	scope.ARCameraParam = ARCameraParam;
 
-	if (window.Module) {
-		window.Module.onRuntimeInitialized = function() {
-            runWhenLoaded();
-            var event = new Event('artoolkit-loaded');
-            window.dispatchEvent(event);
-        }
+	if (scope.Module) {
+		scope.Module.onRuntimeInitialized = function() {
+		runWhenLoaded();
+		var event = new Event('artoolkit-loaded');
+            scope.dispatchEvent(event);
+		}
 	} else {
-        window.Module = {
-            onRuntimeInitialized: function() {
-                runWhenLoaded();
-            }
-        };
-    }
+		scope.Module = {
+			onRuntimeInitialized: function() {
+				runWhenLoaded();
+			}
+		};
+	}
 
 })();

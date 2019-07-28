@@ -14,6 +14,11 @@
 #include <AR/video.h>
 #include <KPM/kpm.h>
 
+#include "ARMarkerNFT.h"
+#include "trackingSub.h"
+
+#define PAGES_MAX               10
+
 struct multi_marker {
 	int id;
 	ARMultiMarkerInfoT *multiMarkerHandle;
@@ -39,9 +44,12 @@ struct arController {
 
 	KpmHandle* kpmHandle;
 	AR2HandleT* ar2Handle;
-
+	THREAD_HANDLE_T *threadHandle = NULL;
+	int detectedPage  = -2;  // -2 Tracking not inited, -1 tracking inited OK, >= 0 tracking online on page.
+	// Markers.
 	int surfaceSetCount = 0; // Running NFT marker id
 	std::unordered_map<int, AR2SurfaceSetT*> surfaceSets;
+	AR2SurfaceSetT      *surfaceSet[PAGES_MAX];
 
 	ARdouble nearPlane = 0.0001;
 	ARdouble farPlane = 1000.0;
@@ -56,7 +64,10 @@ struct arController {
 
 std::unordered_map<int, arController> arControllers;
 std::unordered_map<int, ARParam> cameraParams;
-
+// ARMarker private: to verify
+//static ARFilterTransMatInfo *ftmi;
+//static ARdouble   filterCutoffFrequency;
+//static ARdouble   filterSampleRate;
 
 // ============================================================================
 //	Global variables
@@ -87,28 +98,58 @@ extern "C" {
 			return MARKER_INDEX_OUT_OF_BOUNDS;
 		}
 
-		KpmResult *kpmResult = NULL;
-		int kpmResultNum = -1;
-
-        kpmGetResult( arc->kpmHandle, &kpmResult, &kpmResultNum );
-
+		//KpmResult *kpmResult = NULL;
+		//int kpmResultNum = -1;
+		int              pageNo;
 		int i, j, k;
         int flag = -1;
-        float err = -1;
-        float trans[3][4];
-        for( i = 0; i < kpmResultNum; i++ ) {
-            if (kpmResult[i].pageNo == markerIndex && kpmResult[i].camPoseF == 0 ) {
-	            if( flag == -1 || err > kpmResult[i].error ) { // Take the first or best result.
-	                flag = i;
-	                err = kpmResult[i].error;
-	            }
-	        }
-        }
+				float err;
+				float trans[3][4];
+				float trackingTrans[3][4];
+				// filetring to verify
+				//filterCutoffFrequency = AR_FILTER_TRANS_MAT_CUTOFF_FREQ_DEFAULT;
+				//filterSampleRate = AR_FILTER_TRANS_MAT_SAMPLE_RATE_DEFAULT;
+				//ftmi = arFilterTransMatInit(filterSampleRate, filterCutoffFrequency);
+				if (arc->threadHandle) {
+				int              ret;
+				if( arc->detectedPage == -2 ) {
+						trackingInitStart( arc->threadHandle, arc->videoLuma );
+						arc->detectedPage = -1;
+				}
+				if( arc->detectedPage == -1 ) {
+					ret = trackingInitGetResult( arc->threadHandle, trackingTrans, &pageNo);
+					if( ret == 1 ) {
+						ARLOGi("page detected ret: %d \n", ret);
+							if (pageNo >= 0 && pageNo < arc->surfaceSetCount) {
+									ARLOGi("Detected page %d.\n", pageNo);
+									arc->detectedPage = pageNo;
+									ar2SetInitTrans(arc->surfaceSet[arc->detectedPage], trackingTrans);
+								} else {
+										ARLOGe("Detected bad page %d.\n", pageNo);
+										arc->detectedPage = -2;
+								}
+						} else if( ret < 0 ) {
+								ARLOGi("No page detected.\n");
+								arc->detectedPage = -2;
+						}
+				}
+				if( arc->detectedPage >= 0 && arc->detectedPage < arc->surfaceSetCount) {
+					if( ar2Tracking(arc->ar2Handle, arc->surfaceSet[arc->detectedPage], arc->videoFrame, trackingTrans, &err) < 0 ) {
+						ARLOGi("Tracking lost.\n");
+						arc->detectedPage = -2;
+				} else {
+						ARLOGi("Tracked page %d (max %d).\n", arc->detectedPage, arc->surfaceSetCount - 1);
+				}
+		}
+	} else {
+		ARLOGe("Error: threadHandle\n");
+		arc->detectedPage = -2;
+	}
 
-        if (flag > -1) {
+        if (arc->detectedPage >= 0 && arc->detectedPage < arc->surfaceSetCount ) {
             for (j = 0; j < 3; j++) {
             	for (k = 0; k < 4; k++) {
-            		trans[j][k] = kpmResult[flag].camPose[j][k];
+            		trans[j][k] = trackingTrans[j][k];
             	}
             }
 			EM_ASM_({
@@ -193,15 +234,36 @@ extern "C" {
 		return 0;
 	}
 
+	THREAD_HANDLE_T *trackingInit(KpmHandle* kpmHandle){
+		// Start the KPM tracking thread.
+		THREAD_HANDLE_T *threadHandle;
+    threadHandle = trackingInitInit(kpmHandle);
+    if (!threadHandle) exit(-1);
+		return threadHandle;
+	}
+
 	int detectNFTMarker(int id) {
 		if (arControllers.find(id) == arControllers.end()) { return -1; }
 		arController *arc = &(arControllers[id]);
 
 		KpmResult *kpmResult = NULL;
+		// NFT results.
+		float trackingTrans[3][4];
 		int kpmResultNum = -1;
 
-        kpmMatching( arc->kpmHandle, arc->videoLuma );
-        kpmGetResult( arc->kpmHandle, &kpmResult, &kpmResultNum );
+        //kpmMatching( arc->kpmHandle, arc->videoLuma );
+        //kpmGetResult( arc->kpmHandle, &kpmResult, &kpmResultNum );
+				/*if (arc->threadHandle) {
+            // Perform NFT tracking.
+            float            err;
+            int              ret;
+            int              pageNo;
+
+            if( arc->detectedPage == -2 ) {
+                trackingInitStart( arc->threadHandle, arc->videoLuma );
+                arc->detectedPage = -1;
+            }
+					}*/
         return kpmResultNum;
 	}
 
@@ -226,19 +288,49 @@ extern "C" {
 	int setupAR2(int id) {
 		if (arControllers.find(id) == arControllers.end()) { return -1; }
 		arController *arc = &(arControllers[id]);
-		//arc->pixFormat = arVideoGetPixelFormat();
 
 		arc->kpmHandle = createKpmHandle(arc->paramLT);
 
 		return 0;
 	}
 
+	int setupAR2Threads(int id) {
+		if (arControllers.find(id) == arControllers.end()) { return -1; }
+		arController *arc = &(arControllers[id]);
+
+		if( (arc->ar2Handle = ar2CreateHandle(arc->paramLT, arc->pixFormat, AR2_TRACKING_DEFAULT_THREAD_NUM)) == NULL ) {
+        ARLOGe("Error: ar2CreateHandle.\n");
+        kpmDeleteHandle(&arc->kpmHandle);
+        return (FALSE);
+    }
+    if (threadGetCPU() <= 1) {
+        ARLOGi("Using NFT tracking settings for a single CPU.\n");
+        ar2SetTrackingThresh(arc->ar2Handle, 5.0);
+        ar2SetSimThresh(arc->ar2Handle, 0.50);
+        ar2SetSearchFeatureNum(arc->ar2Handle, 16);
+        ar2SetSearchSize(arc->ar2Handle, 6);
+        ar2SetTemplateSize1(arc->ar2Handle, 6);
+        ar2SetTemplateSize2(arc->ar2Handle, 6);
+    } else {
+        ARLOGi("Using NFT tracking settings for more than one CPU.\n");
+        ar2SetTrackingThresh(arc->ar2Handle, 5.0);
+        ar2SetSimThresh(arc->ar2Handle, 0.50);
+        ar2SetSearchFeatureNum(arc->ar2Handle, 16);
+        ar2SetSearchSize(arc->ar2Handle, 12);
+        ar2SetTemplateSize1(arc->ar2Handle, 6);
+        ar2SetTemplateSize2(arc->ar2Handle, 6);
+    }
+		return 0;
+	}
+
+
 	int loadNFTMarker(arController *arc, int surfaceSetCount, const char* datasetPathname) {
 		int i, pageNo;
-		AR2SurfaceSetT *surfaceSet;
+		//AR2SurfaceSetT *surfaceSet;
 		KpmRefDataSet *refDataSet;
 
 		KpmHandle *kpmHandle = arc->kpmHandle;
+		arc->threadHandle = trackingInit(arc->kpmHandle);
 
 		refDataSet = NULL;
 
@@ -265,12 +357,12 @@ extern "C" {
 		// Load AR2 data.
 		ARLOGi("Reading %s.fset\n", datasetPathname);
 
-		if ((surfaceSet = ar2ReadSurfaceSet(datasetPathname, "fset", NULL)) == NULL ) {
+		if ((arc->surfaceSet[surfaceSetCount] = ar2ReadSurfaceSet(datasetPathname, "fset", NULL)) == NULL ) {
 		    ARLOGe("Error reading data from %s.fset\n", datasetPathname);
 		}
 		ARLOGi("  Done.\n");
 
-		arc->surfaceSets[surfaceSetCount] = surfaceSet;
+  	if (surfaceSetCount == PAGES_MAX) exit(-1);
 
 		if (kpmSetRefDataSet(kpmHandle, refDataSet) < 0) {
 		    ARLOGe("Error: kpmSetRefDataSet\n");
@@ -335,6 +427,8 @@ extern "C" {
 
 		delete &arc->multi_markers;
 		delete arc;
+
+		trackingInitQuit(&arc->threadHandle);
 
 		return 0;
 	}

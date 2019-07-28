@@ -8,6 +8,7 @@ EMSCRIPTEN_BINDINGS(constant_bindings) {
 	function("teardown", &teardown);
 
 	function("setupAR2", &setupAR2);
+	function("setupAR2Threads", &setupAR2Threads);
 
 	function("_addMarker", &addMarker);
 	function("_addMultiMarker", &addMultiMarker);
