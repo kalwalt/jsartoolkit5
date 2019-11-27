@@ -278,7 +278,6 @@
         var self = this;
         var imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
         this.worker.call(this.id, 'process', [imageData], [imageData.data.buffer], function () {
-            console.log('Processed frame');
             self.processingDone = true;
         });
     };

@@ -13,6 +13,7 @@
 #include <AR/paramGL.h>
 #include <AR/video.h>
 #include <KPM/kpm.h>
+#include "trackingMod.h"
 
 #define PAGES_MAX               10          // Maximum number of pages expected. You can change this down (to save memory) or up (to accomodate more pages.)
 
@@ -41,6 +42,8 @@ struct arController {
 
 	KpmHandle* kpmHandle;
 	AR2HandleT* ar2Handle;
+
+	int detectedPage = -2;  // -2 Tracking not inited, -1 tracking inited OK, >= 0 tracking online on page.
 
 	int surfaceSetCount = 0; // Running NFT marker id
 	AR2SurfaceSetT      *surfaceSet[PAGES_MAX];
@@ -93,28 +96,47 @@ extern "C" {
 		KpmResult *kpmResult = NULL;
 		int kpmResultNum = -1;
 
-        kpmGetResult( arc->kpmHandle, &kpmResult, &kpmResultNum );
+		float trans[3][4];
+		float err = -1;
+		if (arc->detectedPage == -2) {
+			kpmMatching( arc->kpmHandle, arc->videoLuma );
+			kpmGetResult( arc->kpmHandle, &kpmResult, &kpmResultNum );
+			int i, j, k;
+			int flag = -1;
+			for( i = 0; i < kpmResultNum; i++ ) {
+				if (kpmResult[i].pageNo == markerIndex && kpmResult[i].camPoseF == 0 ) {
+					if( flag == -1 || err > kpmResult[i].error ) { // Take the first or best result.
+						flag = i;
+						err = kpmResult[i].error;
+					}
+				}
+			}
 
-		int i, j, k;
-        int flag = -1;
-        float err = -1;
-        float trans[3][4];
-        for( i = 0; i < kpmResultNum; i++ ) {
-            if (kpmResult[i].pageNo == markerIndex && kpmResult[i].camPoseF == 0 ) {
-	            if( flag == -1 || err > kpmResult[i].error ) { // Take the first or best result.
-	                flag = i;
-	                err = kpmResult[i].error;
-	            }
-	        }
-        }
+			if (flag > -1) {
+				arc->detectedPage = kpmResult[0].pageNo;
 
-        if (flag > -1) {
-            for (j = 0; j < 3; j++) {
-            	for (k = 0; k < 4; k++) {
-            		trans[j][k] = kpmResult[flag].camPose[j][k];
-            	}
-            }
+				for (j = 0; j < 3; j++) {
+					for (k = 0; k < 4; k++) {
+						trans[j][k] = kpmResult[flag].camPose[j][k];
+					}
+				}
+				ar2SetInitTrans(arc->surfaceSet[arc->detectedPage], trans);
+			} else {
+				arc->detectedPage = -2;
+			}
+		}
 
+		if (arc->detectedPage >= 0) {
+			int trackResult = ar2TrackingMod(arc->ar2Handle, arc->surfaceSet[arc->detectedPage], arc->videoFrame, trans, &err);
+			if( trackResult < 0 ) {
+				ARLOGi("Tracking lost. %d\n", trackResult);
+				arc->detectedPage = -2;
+			} else {
+				ARLOGi("Tracked page %d (max %d).\n",arc->surfaceSet[arc->detectedPage], arc->surfaceSetCount - 1);
+			}
+		}
+
+		if (arc->detectedPage >= 0) {
 			EM_ASM_({
 				var $a = arguments;
 				var i = 0;
@@ -203,10 +225,7 @@ extern "C" {
 
 		KpmResult *kpmResult = NULL;
 		int kpmResultNum = -1;
-
-        kpmMatching( arc->kpmHandle, arc->videoLuma );
-        kpmGetResult( arc->kpmHandle, &kpmResult, &kpmResultNum );
-        return kpmResultNum;
+		return kpmResultNum;
 	}
 
 	KpmHandle *createKpmHandle(ARParamLT *cparamLT) {
@@ -231,6 +250,18 @@ extern "C" {
 		if (arControllers.find(id) == arControllers.end()) { return -1; }
 		arController *arc = &(arControllers[id]);
 		//arc->pixFormat = arVideoGetPixelFormat();
+
+		if ((arc->ar2Handle = ar2CreateHandleMod(arc->paramLT, arc->pixFormat)) == NULL) {
+			ARLOGe("Error: ar2CreateHandle.\n");
+			kpmDeleteHandle(&arc->kpmHandle);
+		}
+		// Settings for devices with single-core CPUs.
+		ar2SetTrackingThresh(arc->ar2Handle, 5.0);
+		ar2SetSimThresh(arc->ar2Handle, 0.50);
+		ar2SetSearchFeatureNum(arc->ar2Handle, 16);
+		ar2SetSearchSize(arc->ar2Handle, 6);
+		ar2SetTemplateSize1(arc->ar2Handle, 6);
+		ar2SetTemplateSize2(arc->ar2Handle, 6);
 
 		arc->kpmHandle = createKpmHandle(arc->paramLT);
 

@@ -297,14 +297,14 @@
                 var marker = ev.data.marker;
 				var obj;
 
-                console.log('Found NFT marker', marker, obj);
-
 				obj = this.threeNFTMarkers[marker.id];
 
-				if (obj) {
-					obj.matrix.fromArray(ev.data.matrixGL_RH);
-					obj.visible = true;
-				}
+				if (!obj) {
+                    return;
+                }
+
+                obj.matrix.fromArray(ev.data.matrixGL_RH);
+				obj.visible = true;
             });
 
             /*
@@ -314,17 +314,17 @@
                 var marker = ev.data.marker;
 				var obj;
 
-                console.log('Lost NFT marker', marker, obj);
-
 				obj = this.threeNFTMarkers[marker.id];
 
-				if (obj) {
-                    obj.matrix.fromArray(ev.data.matrixGL_RH);
+				if (!obj) {
+                    return;
+                }
 
-                    // TODO make it maybe more stable, making the object not visible
-                    // only after some ms of lost tracking?
-					obj.visible = false;
-				}
+                obj.matrix.fromArray(ev.data.matrixGL_RH);
+
+                // TODO make it maybe more stable, making the object not visible
+                // only after some ms of lost tracking?
+				obj.visible = false;
 			});
 
 			/*
