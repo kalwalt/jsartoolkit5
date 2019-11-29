@@ -1,0 +1,78 @@
+<html>
+<body>
+
+<img id="v1" src="Data/img.jpg"></img>
+<img id="v2" src="Data/chalk.jpg"></img>
+<img id="v3" src="Data/chalk_multi.jpg"></img>
+<img id="v4" src="Data/kuva.jpg"></img>
+<img id="v5" src="Data/armchair.jpg"></img>
+
+<script type='text/javascript'>
+      var artoolkit_wasm_url = '../build/artoolkitNft_wasm.wasm';
+</script>
+<script src="../build/artoolkitNft_wasm.js"></script>
+
+<script>
+    window.addEventListener('artoolkit-loaded', () => {
+        var cameraParam = new ARCameraParam();
+
+    var ar1, ar2, ar3, ar4, ar5;
+
+    cameraParam.onload = function() {
+        ar1 = new ARController(v1, cameraParam);
+        ar1.debugSetup();
+
+        ar2 = new ARController(v2, cameraParam);
+        ar2.debugSetup();
+
+        ar3 = new ARController(v3, cameraParam);
+        ar3.debugSetup();
+        ar3.process();
+
+        ar4 = new ARController(v4, cameraParam);
+        ar4.debugSetup();
+        ar4.process();
+
+        ar5 = new ARController(v5, cameraParam);
+
+        ar1.detectMarker();
+        ar1.debugDraw();
+        ar2.detectMarker();
+        ar2.debugDraw();
+
+        ar5.debugSetup();
+        ar5.detectMarker();
+        ar5.debugDraw();
+
+        var assertEq = function(message, value, shouldBe) {
+            if (value !== shouldBe) {
+                throw(message + ' ' + value + ' is not the expected ' + shouldBe);
+            }
+        };
+
+        ar5.setMarkerInfoDir(0, 1);
+        assertEq('dir changed to 1', ar5.getMarker(0).dir, 1);
+        ar5.setMarkerInfoDir(0, 2);
+        assertEq('dir changed to 2', ar5.getMarker(0).dir, 2);
+
+        // Test setter/getter pairs
+        var methods = "DebugMode LogLevel ProjectionNearPlane ProjectionFarPlane ThresholdMode Threshold PatternDetectionMode PattRatio MatrixCodeType LabelingMode ImageProcMode".split(" ");
+        for (var i=0; i<methods.length; i++) {
+            var m = methods[i];
+            var v = ar5['get'+m]();
+            var nv = v === 1 ? 0 : ((v < 1 && v > 0) ? 0.7848 : 1);
+            ar5['set'+m](nv);
+            assertEq(m + ' changed', Math.round(ar5['get'+m]() * 10000) / 10000 , nv);
+            ar5['set'+m](v);
+            assertEq(m + ' changed back', ar5['get'+m](), v);
+        }
+        console.log("Setter/Getter tests run successfully.");
+    };
+
+    cameraParam.load('Data/camera_para.dat');
+});
+
+</script>
+
+</body>
+</html>

@@ -92,6 +92,3 @@ for (var key in enums) {
 // // for test_embind.html
 // var line_template = '\tconsole.log("{}", Module.{});';
 // CONSTANTS.forEach(function(line) { console.log(line_template.replace(/\{\}/g, line)) });
-
-
-
