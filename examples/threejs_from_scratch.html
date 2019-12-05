@@ -2,8 +2,9 @@
 <body>
 
 <script src="js/third_party/three.js/three.min.js"></script>
-<script src="../build/artoolkit.debug.js"></script>
+<script async src="../build/artoolkitNft.debug.js"></script>
 <script src="../js/artoolkit.api.js"></script>
+
 
 <video id="v" src="Data/output_4.ogg" width="320" height="240" loop="" controls="" autoplay webkit-playsinline></video>
 
@@ -111,10 +112,11 @@ function tick() {
 		}
 		markerRoot.visible = true;
 		if (USE_SHADER) {
-			arController.transMatToGLMat(markerRoot.markerMatrix, shaderMaterial.uniforms.transformationMatrix.value.elements);
+            arController.arglCameraViewRHf(arController.transMatToGLMat(markerRoot.markerMatrix), shaderMaterial.uniforms.transformationMatrix.value.elements);
 		} else {
-			arController.transMatToGLMat(markerRoot.markerMatrix, markerRoot.matrix.elements);
-		}
+            arController.arglCameraViewRHf(arController.transMatToGLMat(markerRoot.markerMatrix), markerRoot.matrix.elements);
+        }
+
 	} else {
 		markerRoot.visible = false;
 	}
@@ -138,9 +140,9 @@ cameraParam.onload = function() {
 	var camera_mat = arController.getCameraMatrix();
 
 	if (USE_SHADER) {
-		shaderMaterial.uniforms.cameraMatrix.value.elements.set(camera_mat);
+		shaderMaterial.uniforms.cameraMatrix.value.fromArray(camera_mat);
 	} else {
-		camera.projectionMatrix.elements.set(camera_mat);
+		camera.projectionMatrix.fromArray(camera_mat);
 	}
 
 };

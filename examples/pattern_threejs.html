@@ -27,7 +27,9 @@ html,body {
 
 <p>&larr; <a href="index.html">Back to examples</a></p>
 
-<script async src="../build/artoolkit.min.js"></script>
+<!--<script async src="../build/artoolkitNft.min.js"></script>-->
+<script async src="../build/artoolkitNft.debug.js"></script>
+<script src="../js/artoolkit.api.js"></script>
 <script async src="js/third_party/three.js/three.min.js"></script>
 <script async src="../js/artoolkit.three.js"></script>
 
@@ -35,7 +37,7 @@ html,body {
 
 window.ARThreeOnLoad = function() {
 
-	ARController.getUserMediaThreeScene({maxARVideoSize: 320, cameraParam: 'Data/camera_para-iPhone 5 rear 640x480 1.0m.dat', 
+	ARController.getUserMediaThreeScene({maxARVideoSize: 320, cameraParam: 'Data/camera_para-iPhone 5 rear 640x480 1.0m.dat',
 	onSuccess: function(arScene, arController, arCamera) {
 
 		document.body.className = arController.orientation;
@@ -69,14 +71,14 @@ window.ARThreeOnLoad = function() {
 			new THREE.SphereGeometry(0.5, 8, 8),
 			new THREE.MeshNormalMaterial()
 		);
-		sphere.material.shading = THREE.FlatShading;
+		sphere.material.flatShading;
 		sphere.position.z = 0.5;
 
 		var torus = new THREE.Mesh(
 			new THREE.TorusGeometry(0.3, 0.2, 8, 8),
 			new THREE.MeshNormalMaterial()
 		);
-		torus.material.shading = THREE.FlatShading;
+		torus.material.flatShading;
 		torus.position.z = 0.5;
 		torus.rotation.x = Math.PI/2;
 

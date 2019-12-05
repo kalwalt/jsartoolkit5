@@ -1,6 +1,8 @@
 {
   "name": "jsartoolkit",
   "version": "0.0.0",
+  "main": "js/index",
+  "typings": "js/index",
   "description": "Emscripten port of ARToolKit to JavaScript",
   "keywords": [
     "ARToolKit",
@@ -16,12 +18,18 @@
   "bugs": {
     "url": "https://github.com/artoolkit/jsartoolkit5/issues"
   },
-  "dependencies": {},
+  "dependencies": {
+    "json2csv": "^4.1.5"
+  },
   "devDependencies": {
     "grunt": "^0.4.5",
+    "grunt-cli": "^1.2.0",
     "grunt-jsdoc": "^1.1.0",
+    "http-server": "^0.10.0",
     "ink-docstrap": "^1.1.4",
     "jsdoc": "^3.4.0",
+    "opener": "^1.4.3",
+    "qunit": "^2.4.1",
     "watch": "^0.18.0"
   },
   "scripts": {

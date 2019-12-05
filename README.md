@@ -18,19 +18,30 @@ Emscripten port of [ARToolKit](https://github.com/artoolkit/artoolkit5) to JavaS
   2. Install python2 (https://www.python.org/downloads/)
   3. Install emscripten (http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#download-and-install)
 
+jsartoolkit5 aim is to create a Javascript version of artoolkit5. First, you need the artoolkit5 repository on your machine:
 2. Clone ARToolKit5 project to get the latest source files. From within jsartoolkit5 directory do `git submodule update --init`. If you already cloned ARToolKit5 to a different directory you can:
   - create a link in the `jsartoolkit5/emscripten/` directory that points to ARToolKit5 (`jsartoolkit5/emscripten/artoolkit5`)
   - or, set the `ARTOOLKIT5_ROOT` environment variable to point to your ARToolKit5 clone
   - or, change the `tools/makem.js` file to point to your artoolkit5 clone (line 62, 83, 107, 140)
 
-3. Building
+3. Copy libjpeg-6b to emscripten/libjpeg
+  - or, set the `LIBJPEG_ROOT` environment variable to point to your libjpeg source directory
+
+  You can use the following version (tested recently) of libjpeg: (https://github.com/kalwalt/libjpeg-for-jsartoolkit5)
+
+4. Set the `LIBJPEG_ROOT` variable - if you have not done it before - to the local path of your libjpeg (which you have cloned in the previous step)
+
+5. Building
   1. Make sure `EMSCRIPTEN` env variable is set (e.g. `EMSCRIPTEN=/usr/lib/emsdk_portable/emscripten/master/ node tools/makem.js`
   2. Rename the `ARTOOLKIT5_ROOT/include/AR/config.h.in` file to `config.h`
-  3. Run `node run build`
-  
-During developement, you can run ```node run watch```, it will rebuild the library everytime you change ```./js/``` directory.
+  3. Run `npm run build`
 
-4. The built ASM.js files are in `/build`. There's a build with debug symbols in `artoolkit.debug.js` and the optimized build with bundled JS API in `artoolkit.min.js`.
+Troubleshootings:
+  - If you get errors about `BINARYEN_TRAP_MODE`, comment/de-comment following line on `makem.js` file: `FLAGS += ' -s BINARYEN_TRAP_MODE=clamp'`
+
+During development, you can run ```npm run watch```, it will rebuild the library everytime you change ```./js/``` directory.
+
+6. The built ASM.js files are in `/build`. There's a build with debug symbols in `artoolkit.debug.js` and the optimized build with bundled JS API in `artoolkit.min.js`.
 
 # ARToolKit JS API
 
@@ -102,7 +113,7 @@ The basic operation goes like this:
     // For pattern markers, use artoolkit.AR_TEMPLATE_MATCHING_COLOR
     //
     ar.setPatternDetectionMode(artoolkit.AR_TEMPLATE_MATCHING_COLOR_AND_MATRIX);
-    
+
     ar.addEventListener('markerNum', function (ev) {
       console.log('got markers', markerNum);
     });

@@ -64,7 +64,7 @@ The first thing we’ll do is create the video source. For that, we’ll use the
 
 <pre class="prettyprint"><code>...
 
-var arController = new arController(video, 'Data/camera_para.dat');
+var arController = new ARController(video, 'Data/camera_para.dat');
 arController.onload = function() {
 	console.log('ARController ready for use', arController);
 };
@@ -78,7 +78,7 @@ arController.onload = function() {
 
 var camera = new ARCameraParam('Data/camera_para.dat');
 camera.onload = function() {
-	var arController = new arController(video.videoWidth, video.videoHeight, camera);
+	var arController = new ARController(video.videoWidth, video.videoHeight, camera);
 	console.log('ARController ready for use', arController);
 };
 
@@ -143,11 +143,21 @@ arController.process(video);
 
 <h2>Using JSARToolKit with Three.js</h2>
 
-<p>Now that we have the marker positions from JSARToolKit, we can copy them to the Three.js objects that should appear on top of the markers. Note that if you move the marker outside of the camera, the tracking is lost and the Three.js object won't get updated. You can make the object either stay where it is, have it abruptly disappear, or fade it out. I prefer fading out objects that have lost tracking, but it can be a bit fiddly controlling all the opacities of the materials in the object.
+<p>Now that we have the marker positions from JSARToolKit, we can copy them to the Three.js objects that should appear on top of the markers.
+Note that if you move the marker outside of the camera, the tracking is lost and the Three.js object won't get updated.
+You can make the object either stay where it is, have it abruptly disappear, or fade it out.
+I prefer fading out objects that have lost tracking, but it can be a bit fiddly controlling all the opacities of the materials in the object.
 
-<p>The cool thing is that the Three.js object tracking the marker is a normal Three.js object. So we can use all the usual tricks at our disposal. For this demo, we'll add a touch event handler to detect when you're tapping on the object and animating the object when you do. The code below is the usual Three.js mouse raycasting code, it casts a ray from the mouse coordinates into the 3D scene and checks the ray against objects in the scene to see if any of them intersect the ray. If we find an intersection it means that the intersected object is under the mouse cursor. Add the raycasting code in your tap event listener and presto! You've got a tappable Three.js scene.
+<p>The cool thing is that the Three.js object tracking the marker is a normal Three.js object.
+So we can use all the usual tricks at our disposal. For this demo, we'll add a touch event handler to detect when you're
+tapping on the object and animating the object when you do. The code below is the usual Three.js mouse raycasting code,
+it casts a ray from the mouse coordinates into the 3D scene and checks the ray against objects in the scene to see
+if any of them intersect the ray. If we find an intersection it means that the intersected object is under the mouse cursor.
+Add the raycasting code in your tap event listener and presto! You've got a tappable Three.js scene.
 
-<p>I added a small animation to the tap listener as well, so that when you click on the box object, it opens and stuff flies out. To check it out, go visit the demo page and allow access to your camera. Now point your camera at a flat piece of paper with the marker. Hohoo, you can now see the box. Tap on it to open it!
+<p>I added a small animation to the tap listener as well, so that when you click on the box object,
+    it opens and stuff flies out. To check it out, go visit the demo page and allow access to your camera.
+     Now point your camera at a flat piece of paper with the marker. Hohoo, you can now see the box. Tap on it to open it!
 
 <p>Code-wise, I'm going to cheat a bit and use the Three.js integration in JSARToolKit5. It does all the stuff that we set up above, and packages it up into a couple of easy-to-use methods. Just load the <code>js/artoolkit.three.js</code> support library and you're good to go.
 
@@ -242,7 +252,7 @@ var markerRoot = new THREE.Object3D();
 markerRoot.matrixAutoUpdate = false;
 
 // Add a getMarker event listener that keeps track of barcode marker with id 20.
-// 
+//
 arController.addEventListener('getMarker', function(ev) {
 	if (ev.data.marker.idMatrix === 20) {
 
@@ -358,7 +368,7 @@ if (arController.orientation === 'portrait') {
 	renderer.domElement.style.transformOrigin = '0 0';
 	renderer.domElement.style.transform = 'rotate(-90deg) translateX(-100%)';
 } else {
-	renderer.setSize(video.videoWidth, video.videoHeight);	
+	renderer.setSize(video.videoWidth, video.videoHeight);
 }
 </code></pre>
 
@@ -403,7 +413,7 @@ if (marker.idMatrix === 5) {
 		// Get the marker matrix using continuous tracking
 		arController.getTransMatSquareCont(i, 1, markerMatrix, markerMatrix);
 	} else {
-		arController.getTransMatSquare(i, 1, markerMatrix);	
+		arController.getTransMatSquare(i, 1, markerMatrix);
 	}
 
 	// ... The rest is as usual

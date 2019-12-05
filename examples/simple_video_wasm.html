@@ -1,0 +1,30 @@
+<html>
+<body>
+
+<video id="v" src="Data/output_4.ogg" width="320" height="240" loop="" controls="" autoplay></video>
+
+<script type='text/javascript'>
+      var artoolkit_wasm_url = '../build/artoolkitNft_wasm.wasm';
+</script>
+<script src="../build/artoolkitNft_wasm.js"></script>
+
+<script>
+    window.addEventListener('artoolkit-loaded', () => {
+      var arController = new ARController(320, 240, 'Data/camera_para.dat');
+      arController.onload = function() {
+
+        var video = document.getElementById('v');
+
+        arController.debugSetup();
+
+        var interval = setInterval(function() {
+          arController.process(video);
+        }, 13);
+
+      };
+});
+
+</script>
+
+</body>
+</html>

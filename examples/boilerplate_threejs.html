@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 <script src="js/third_party/three.js/three.min.js"></script>
 <script src='js/third_party/three.js/OrbitControls.js'></script>
-<script src="../build/artoolkit.debug.js"></script>
+<script async src="../build/artoolkitNft.debug.js"></script>
 <script src="../js/artoolkit.api.js"></script>
 <body><script>
 	//////////////////////////////////////////////////////////////////////////////////
@@ -40,7 +40,7 @@
 
 	// init scene and camera
 	var scene	= new THREE.Scene();
-	
+
 	//////////////////////////////////////////////////////////////////////////////////
 	//		Comments
 	//////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +76,7 @@
 		if (!arController) return;
 
 		arController.detectMarker(video);
-		arController.debugDraw();		
+		arController.debugDraw();
 
 		// update markerRoot with the found markers
 		var markerNum = arController.getMarkerNum();
@@ -102,38 +102,38 @@
 	//		add an object in the scene
 	//////////////////////////////////////////////////////////////////////////////////
 
-	// add a torus knot	
+	// add a torus knot
 	var geometry	= new THREE.CubeGeometry(1,1,1);
 	var material	= new THREE.MeshNormalMaterial({
 		transparent : true,
 		opacity: 0.5,
 		side: THREE.DoubleSide
-	}); 
+	});
 	var mesh	= new THREE.Mesh( geometry, material );
 	mesh.position.z	= geometry.parameters.height/2
 	markerRoot.add( mesh );
-	
+
 	var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,32,32);
-	var material	= new THREE.MeshNormalMaterial(); 
+	var material	= new THREE.MeshNormalMaterial();
 	var mesh	= new THREE.Mesh( geometry, material );
 	mesh.position.z	= 0.5
 	markerRoot.add( mesh );
-	
+
 	onRenderFcts.push(function(){
 		mesh.rotation.x += 0.1
 	})
-	
-	
-		
+
+
+
 	//////////////////////////////////////////////////////////////////////////////////
 	//		render the whole thing on the page
 	//////////////////////////////////////////////////////////////////////////////////
 
 	// render the scene
 	onRenderFcts.push(function(){
-		renderer.render( scene, camera );		
+		renderer.render( scene, camera );
 	})
-	
+
 	// run the rendering loop
 	var lastTimeMsec= null
 	requestAnimationFrame(function animate(nowMsec){

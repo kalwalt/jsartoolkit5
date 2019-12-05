@@ -7,8 +7,11 @@ EMSCRIPTEN_BINDINGS(constant_bindings) {
 	function("setup", &setup);
 	function("teardown", &teardown);
 
+	function("setupAR2", &setupAR2);
+
 	function("_addMarker", &addMarker);
 	function("_addMultiMarker", &addMultiMarker);
+	function("_addNFTMarker", &addNFTMarker);
 
 	function("getMultiMarkerNum", &getMultiMarkerNum);
 	function("getMultiMarkerCount", &getMultiMarkerCount);
@@ -27,8 +30,11 @@ EMSCRIPTEN_BINDINGS(constant_bindings) {
 	function("detectMarker", &detectMarker);
 	function("getMarkerNum", &getMarkerNum);
 
+	function("detectNFTMarker", &detectNFTMarker);
+
 	function("getMultiEachMarker", &getMultiEachMarkerInfo);
 	function("getMarker", &getMarkerInfo);
+	function("getNFTMarker", &getNFTMarkerInfo);
 
 
 	/* AR Toolkit C APIS */
