@@ -103,12 +103,14 @@ extern "C" {
             if (kpmResult[i].pageNo == markerIndex && kpmResult[i].camPoseF == 0 ) {
 	            if( flag == -1 || err > kpmResult[i].error ) { // Take the first or best result.
 	                flag = i;
+									ARLOGi("flag error is: %s\n", flag);
 	                err = kpmResult[i].error;
 	            }
 	        }
         }
-
+				ARLOGi("flag is: %s\n", flag);
         if (flag > -1) {
+					ARLOGi("flag is greater than -1. \n");
             for (j = 0; j < 3; j++) {
             	for (k = 0; k < 4; k++) {
             		trans[j][k] = kpmResult[flag].camPose[j][k];
