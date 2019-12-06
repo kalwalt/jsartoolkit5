@@ -1,0 +1,45 @@
+<html>
+<head>
+    <title>NFT_video</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=0.5, maximum-scale=1">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+<div style="position:absolute; color:white; top:0;left:0" id="stats1"><div>Main</div></div>
+<div id="container">
+    <video id="video" playsinline src="resources/video.mp4" loop></video>
+    <canvas style="position: absolute; left:0; top:0" id="canvas_draw"></canvas>
+</div>
+<button id="startvideo">PLAY VIDEO</button>
+<button id="process">START PROCESSING</button>
+
+<script src="../js/third_party/three.js/stats.min.js"></script>
+<script src="../../build/artoolkitNft.min.js"></script>
+<script src="main.js"></script>
+
+<script>
+    let statsMain = new Stats();
+    statsMain.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
+    statsMain.domElement.style.position = 'relative';
+    statsMain.domElement.style.left = '0px';
+    statsMain.domElement.style.top = '0px';
+    document.getElementById("stats1").appendChild(statsMain.dom);
+
+    let container = document.getElementById('container');
+    let video = document.getElementById('video');
+    let canvas_draw = document.getElementById('canvas_draw');
+
+    document.getElementById("startvideo").onclick = () => {
+        video.play();
+    };
+    document.getElementById("process").onclick = () => {
+        start(container, markers["pinball"], video, video.videoWidth, video.videoHeight, canvas_draw, () => statsMain.update());
+    };
+</script>
+</body>
+</html>
