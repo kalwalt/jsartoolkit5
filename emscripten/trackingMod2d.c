@@ -32,6 +32,7 @@
  *  Copyright 2006-2015 ARToolworks, Inc.
  *
  *  Author(s): Hirokazu Kato, Philip Lamb
+ *  Modified version by @misdake
  *
  */
 

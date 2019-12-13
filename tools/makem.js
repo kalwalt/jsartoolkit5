@@ -37,76 +37,81 @@ var BUILD_MIN_FILE = 'artoolkitNft.min.js';
 var MAIN_SOURCES = [
 	'ARToolKitJS.cpp',
 	'trackingMod.c',
-	'tracking2d.c',
+	'trackingMod2d.c',
 ];
 
 MAIN_SOURCES = MAIN_SOURCES.map(function(src) {
 	return path.resolve(SOURCE_PATH, src);
 }).join(' ');
 
-var ar_sources = [
-	'AR/arLabelingSub/*.c',
-	'AR/*.c',
-	'ARICP/*.c',
-	'ARMulti/*.c',
-	'Video/video.c',
-	'ARUtil/log.c',
-  'ARUtil/file_utils.c',
-	//'Video/videoLuma.c',
-	//'Gl/gsub_lite.c',
-].map(function(src) {
-	return path.resolve(__dirname, ARTOOLKIT5_ROOT + '/lib/SRC/', src);
-});
+var glob = require("glob");
+function match(pattern) {
+    var r = glob.sync('emscripten/artoolkit5/lib/SRC/' + pattern);
+    return r;
+}
+function matchAll(patterns, prefix="") {
+    let r = [];
+    for(let pattern of patterns) {
+        r.push(...(match(prefix + pattern)));
+    }
+    return r;
+}
 
-var ar2_sources = [
-	'handle.c',
-	'imageSet.c',
-	'jpeg.c',
-	'marker.c',
-	'featureMap.c',
-	'featureSet.c',
-	'selectTemplate.c',
-	'surface.c',
-	'tracking.c',
-	'tracking2d.c',
-	'matching.c',
-	'matching2.c',
-	'template.c',
-	'searchPoint.c',
-	'coord.c',
-	'util.c',
-].map(function(src) {
-	return path.resolve(__dirname, ARTOOLKIT5_ROOT + '/lib/SRC/AR2/', src);
-});
+var ar_sources = matchAll([
+    'AR/arLabelingSub/*.c',
+    'AR/*.c',
+    'ARICP/*.c',
+    'ARMulti/*.c',
+    'Video/video.c',
+    'ARUtil/log.c',
+    'ARUtil/file_utils.c',
+]);
 
-var kpm_sources = [
-	'kpmHandle.c*',
-	'kpmRefDataSet.c*',
-	'kpmMatching.c*',
-	'kpmResult.c*',
-	'kpmUtil.c*',
-	'kpmFopen.c*',
-	'FreakMatcher/detectors/DoG_scale_invariant_detector.c*',
-	'FreakMatcher/detectors/gaussian_scale_space_pyramid.c*',
-	'FreakMatcher/detectors/gradients.c*',
-	'FreakMatcher/detectors/harris.c*',
-	'FreakMatcher/detectors/orientation_assignment.c*',
-	'FreakMatcher/detectors/pyramid.c*',
-	'FreakMatcher/facade/visual_database_facade.c*',
-	'FreakMatcher/matchers/hough_similarity_voting.c*',
-	'FreakMatcher/matchers/freak.c*',
-	'FreakMatcher/framework/date_time.c*',
-	'FreakMatcher/framework/image.c*',
-	'FreakMatcher/framework/logger.c*',
-	'FreakMatcher/framework/timers.c*',
-].map(function(src) {
-	return path.resolve(__dirname, ARTOOLKIT5_ROOT + '/lib/SRC/KPM/', src);
-});
+var ar2_sources = matchAll([
+    'handle.c',
+    'imageSet.c',
+    'jpeg.c',
+    'marker.c',
+    'featureMap.c',
+    'featureSet.c',
+    'selectTemplate.c',
+    'surface.c',
+    'tracking.c',
+    'tracking2d.c',
+    'matching.c',
+    'matching2.c',
+    'template.c',
+    'searchPoint.c',
+    'coord.c',
+    'util.c',
+], 'AR2/');
+
+var kpm_sources = matchAll([
+    'kpmHandle.c*',
+    'kpmRefDataSet.c*',
+    'kpmMatching.c*',
+    'kpmResult.c*',
+    'kpmUtil.c*',
+    'kpmFopen.c*',
+    'FreakMatcher/detectors/DoG_scale_invariant_detector.c*',
+    'FreakMatcher/detectors/gaussian_scale_space_pyramid.c*',
+    'FreakMatcher/detectors/gradients.c*',
+    'FreakMatcher/detectors/harris.c*',
+    'FreakMatcher/detectors/orientation_assignment.c*',
+    'FreakMatcher/detectors/pyramid.c*',
+    'FreakMatcher/facade/visual_database_facade.c*',
+    'FreakMatcher/matchers/hough_similarity_voting.c*',
+    'FreakMatcher/matchers/freak.c*',
+    'FreakMatcher/framework/date_time.c*',
+    'FreakMatcher/framework/image.c*',
+    'FreakMatcher/framework/logger.c*',
+    'FreakMatcher/framework/timers.c*',
+], 'KPM/');
 
 if (HAVE_NFT) {
-	ar_sources = ar_sources
-	.concat(ar2_sources)
-	.concat(kpm_sources);
+  ar_sources = ar_sources
+  .concat(ar2_sources)
+  .concat(kpm_sources);
 }
 
 var DEFINES = ' ';
@@ -116,7 +121,6 @@ var FLAGS = '' + OPTIMIZE_FLAGS;
 FLAGS += ' -Wno-warn-absolute-paths ';
 FLAGS += ' -s TOTAL_MEMORY=' + MEM + ' ';
 FLAGS += ' -s USE_ZLIB=1';
-//FLAGS += ' -s ERROR_ON_UNDEFINED_SYMBOLS=0';
 //FLAGS += ' -s NO_BROWSER=1 '; // for 20k less
 FLAGS += ' --memory-init-file 0 '; // for memless file
 // FLAGS += ' -s BINARYEN_TRAP_MODE=clamp'
@@ -124,10 +128,6 @@ FLAGS += ' --memory-init-file 0 '; // for memless file
 var PRE_FLAGS = ' --pre-js ' + path.resolve(__dirname, '../js/artoolkit.api.js') +' ';
 
 FLAGS += ' --bind ';
-FLAGS += ' -msse';
-FLAGS += ' -msse2';
-FLAGS += ' -msse3';
-FLAGS += ' -mssse3';
 
 /* DEBUG FLAGS */
 var DEBUG_FLAGS = ' -g ';
@@ -139,23 +139,18 @@ DEBUG_FLAGS += ' -s ALLOW_MEMORY_GROWTH=1';
 DEBUG_FLAGS += '  -s DEMANGLE_SUPPORT=1 ';
 
 var INCLUDES = [
-	path.resolve(__dirname, ARTOOLKIT5_ROOT + '/include'),
-	OUTPUT_PATH,
-	SOURCE_PATH,
-	path.resolve(__dirname, ARTOOLKIT5_ROOT + '/lib/SRC/KPM/FreakMatcher'),
-	//path.resolve(__dirname, ARTOOLKIT5_ROOT + '/lib/SRC/GL'),
-	path.resolve(__dirname, ARTOOLKIT5_ROOT + '/../libjpeg'),
-	//path.resolve(__dirname, ARTOOLKIT5_ROOT + '/Video'),
-	//'lib/SRC/KPM/FreakMatcher',
-	// 'include/macosx-universal/',
-	// '../jpeg-6b',
+    path.resolve(__dirname, ARTOOLKIT5_ROOT + '/include'),
+    OUTPUT_PATH,
+    SOURCE_PATH,
+    path.resolve(__dirname, ARTOOLKIT5_ROOT + '/lib/SRC/KPM/FreakMatcher'),
+    path.resolve(__dirname, ARTOOLKIT5_ROOT + '/../libjpeg'),
 ].map(function(s) { return '-I' + s }).join(' ');
 
 function format(str) {
-	for (var f = 1; f < arguments.length; f++) {
-		str = str.replace(/{\w*}/, arguments[f]);
-	}
-	return str;
+    for (var f = 1; f < arguments.length; f++) {
+        str = str.replace(/{\w*}/, arguments[f]);
+    }
+    return str;
 }
 
 
@@ -171,120 +166,99 @@ var libjpeg_sources = 'jcapimin.c jcapistd.c jccoefct.c jccolor.c jcdctmgr.c jch
 		jdpostct.c jdsample.c jdtrans.c jerror.c jfdctflt.c jfdctfst.c \
 		jfdctint.c jidctflt.c jidctfst.c jidctint.c jidctred.c jquant1.c \
 		jquant2.c jutils.c jmemmgr.c \
-		jmemansi.c'.split(/\s+/).join(' ' + process.env.LIBJPEG_ROOT + '/')
+		jmemansi.c'.split(/\s+/).join(' ' + process.env.LIBJPEG_ROOT + '/');
 function clean_builds() {
-	try {
-		var stats = fs.statSync(OUTPUT_PATH);
-	} catch (e) {
-		fs.mkdirSync(OUTPUT_PATH);
-	}
+    try {
+        var stats = fs.statSync(OUTPUT_PATH);
+    } catch (e) {
+        fs.mkdirSync(OUTPUT_PATH);
+    }
 
-	try {
-		var files = fs.readdirSync(OUTPUT_PATH);
-		if (files.length > 0)
-		for (var i = 0; i < files.length; i++) {
-			var filePath = OUTPUT_PATH + '/' + files[i];
-			if (fs.statSync(filePath).isFile())
-				fs.unlinkSync(filePath);
-		}
-	}
-	catch(e) { return console.log(e); }
+    try {
+        var files = fs.readdirSync(OUTPUT_PATH);
+        if (files.length > 0)
+            for (var i = 0; i < files.length; i++) {
+                var filePath = OUTPUT_PATH + '/' + files[i];
+                if (fs.statSync(filePath).isFile())
+                    fs.unlinkSync(filePath);
+            }
+    }
+    catch(e) { return console.log(e); }
 }
 
 var compile_arlib = format(EMCC + ' ' + INCLUDES + ' '
-	+ ar_sources.join(' ')
-	+ FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}libar.bc ',
-		OUTPUT_PATH);
+    + ar_sources.join(' ')
+    + FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}libar.bc ',
+    OUTPUT_PATH);
 
- var compile_kpm = format(EMCC + ' ' + INCLUDES + ' '
- 	+ kpm_sources.join(' ')
- 	+ FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}libkpm.bc ',
- 		OUTPUT_PATH);
+var compile_kpm = format(EMCC + ' ' + INCLUDES + ' '
+    + kpm_sources.join(' ')
+    + FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}libkpm.bc ',
+    OUTPUT_PATH);
 
 var compile_libjpeg = format(EMCC + ' ' + INCLUDES + ' '
     + path.resolve(__dirname, LIBJPEG_ROOT) + '/' + libjpeg_sources
-	+ FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}libjpeg.bc ',
-		OUTPUT_PATH);
+    + FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}libjpeg.bc ',
+    OUTPUT_PATH);
 
-/*
-var compile_libjpeg = format(EMCC + ' ' + INCLUDES + ' '
-	+ '/home/walter/kalwalt-github/jsartoolkit5/emscripten/jpeg-6b/' +  libjpeg_sources
-	+ FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}libjpeg.bc ',
-		OUTPUT_PATH);
-
+var ALL_BC = " {OUTPUT_PATH}libar.bc {OUTPUT_PATH}libjpeg.bc ";
 
 var compile_combine = format(EMCC + ' ' + INCLUDES + ' '
-	+ ' {OUTPUT_PATH}*.bc ' + MAIN_SOURCES
-	+ FLAGS + ' '  + DEBUG_FLAGS + DEFINES + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
-	OUTPUT_PATH, OUTPUT_PATH, BUILD_FILE);
-*/
-var compile_combine = format(EMCC + ' ' + INCLUDES + ' '
-	+ ' {OUTPUT_PATH}*.bc ' + MAIN_SOURCES
-	+ FLAGS + ' -s WASM=0' + ' '  + DEBUG_FLAGS + DEFINES + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
-	OUTPUT_PATH, OUTPUT_PATH, BUILD_DEBUG_FILE);
-/*
+    + ALL_BC + MAIN_SOURCES
+    + FLAGS + ' -s WASM=0' + ' '  + DEBUG_FLAGS + DEFINES + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
+    OUTPUT_PATH, OUTPUT_PATH, OUTPUT_PATH, BUILD_DEBUG_FILE);
+
 var compile_combine_min = format(EMCC + ' ' + INCLUDES + ' '
-	+ ' {OUTPUT_PATH}*.bc ' + MAIN_SOURCES
-	+ FLAGS + ' ' + DEFINES + PRE_FLAGS + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
-	OUTPUT_PATH, OUTPUT_PATH, BUILD_MIN_FILE);
-*/
-var compile_combine_min = format(EMCC + ' ' + INCLUDES + ' '
-	+ ' {OUTPUT_PATH}*.bc ' + MAIN_SOURCES
-	+ FLAGS + ' -s WASM=0' + ' ' + DEFINES + PRE_FLAGS + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
-	OUTPUT_PATH, OUTPUT_PATH, BUILD_MIN_FILE);
+    + ALL_BC + MAIN_SOURCES
+    + FLAGS + ' -s WASM=0' + ' ' + DEFINES + PRE_FLAGS + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
+    OUTPUT_PATH, OUTPUT_PATH, OUTPUT_PATH, BUILD_MIN_FILE);
 
 var compile_wasm = format(EMCC + ' ' + INCLUDES + ' '
-	+ ' {OUTPUT_PATH}*.bc ' + MAIN_SOURCES
-	+ FLAGS + DEFINES + PRE_FLAGS + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
-	OUTPUT_PATH, OUTPUT_PATH, BUILD_WASM_FILE);
+    + ALL_BC + MAIN_SOURCES
+    + FLAGS + DEFINES + PRE_FLAGS + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
+    OUTPUT_PATH, OUTPUT_PATH, OUTPUT_PATH, BUILD_WASM_FILE);
 
-/*
 var compile_all = format(EMCC + ' ' + INCLUDES + ' '
-	+ ar_sources.join(' ')
-	+ FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
-		OUTPUT_PATH, BUILD_FILE);
-*/
-var compile_all = format(EMCC + ' ' + INCLUDES + ' '
-	+ ar_sources.join(' ')
-	+ FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
-		OUTPUT_PATH, BUILD_DEBUG_FILE);
+    + ar_sources.join(' ')
+    + FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
+    OUTPUT_PATH, BUILD_DEBUG_FILE);
 
 /*
  * Run commands
  */
 
 function onExec(error, stdout, stderr) {
-	if (stdout) console.log('stdout: ' + stdout);
-	if (stderr) console.log('stderr: ' + stderr);
-	if (error !== null) {
-		console.log('exec error: ' + error.code);
-		process.exit(error.code);
-	} else {
-		runJob();
-	}
+    if (stdout) console.log('stdout: ' + stdout);
+    if (stderr) console.log('stderr: ' + stderr);
+    if (error !== null) {
+        console.log('exec error: ' + error.code);
+        process.exit(error.code);
+    } else {
+        runJob();
+    }
 }
 
 function runJob() {
-	if (!jobs.length) {
-		console.log('Jobs completed');
-		return;
-	}
-	var cmd = jobs.shift();
+    if (!jobs.length) {
+        console.log('Jobs completed');
+        return;
+    }
+    var cmd = jobs.shift();
 
-	if (typeof cmd === 'function') {
-		cmd();
-		runJob();
-		return;
-	}
+    if (typeof cmd === 'function') {
+        cmd();
+        runJob();
+        return;
+    }
 
-	console.log('\nRunning command: ' + cmd + '\n');
-	exec(cmd, onExec);
+    console.log('\nRunning command: ' + cmd + '\n');
+    exec(cmd, onExec);
 }
 
 var jobs = [];
 
 function addJob(job) {
-	jobs.push(job);
+    jobs.push(job);
 }
 
 addJob(clean_builds);
