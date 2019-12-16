@@ -20,7 +20,7 @@ var LIBJPEG_INCLUDE = process.env.LIBJPEG_ROOT;
 
 // LIBJPEG_ROOT not defined? Take to one from artoolkit5 directory for macOS and Win
 if (!LIBJPEG_INCLUDE) {
-  const platform = os.platform()
+	const platform = os.platform();
   if (platform === 'darwin') {
     LIBJPEG_INCLUDE = `${ARTOOLKIT5_ROOT}/include/macosx-universal/`
   } else if (platform === 'win32') {
@@ -174,10 +174,6 @@ function format(str) {
     return str;
 }
 
-
-// Memory Allocations
-// jmemansi.c jmemname.c jmemnobs.c jmemdos.c jmemmac.c
-
 function clean_builds() {
     try {
         var stats = fs.statSync(OUTPUT_PATH);
@@ -207,7 +203,7 @@ var compile_kpm = format(EMCC + ' ' + INCLUDES + ' '
     + FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}libkpm.bc ',
     OUTPUT_PATH);
 
-var ALL_BC = " {OUTPUT_PATH}libar.bc ";
+var ALL_BC = " {OUTPUT_PATH}libar.bc " + SOURCE_PATH + "libjpeg/lib/libjpeg.bc ";
 
 var compile_combine = format(EMCC + ' ' + INCLUDES + ' '
     + ALL_BC + MAIN_SOURCES
