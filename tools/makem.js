@@ -1,20 +1,32 @@
 /*
  * Simple script for running emcc on ARToolKit
  * @author zz85 github.com/zz85
+ * @author ThorstenBux github.com/ThorstenBux
  */
 
 
 var
 	exec = require('child_process').exec,
 	path = require('path'),
-	fs = require('fs'),
+  fs = require('fs'),
+  os = require('os'),
 	child;
 
 var HAVE_NFT = 1;
 
 var EMSCRIPTEN_ROOT = process.env.EMSCRIPTEN;
 var ARTOOLKIT5_ROOT = process.env.ARTOOLKIT5_ROOT || path.resolve(__dirname, "../emscripten/artoolkit5");
-var LIBJPEG_ROOT = process.env.LIBJPEG_ROOT || "../emscripten/libjpeg";
+var LIBJPEG_INCLUDE = process.env.LIBJPEG_ROOT;
+
+// LIBJPEG_ROOT not defined? Take to one from artoolkit5 directory for macOS and Win
+if (!LIBJPEG_INCLUDE) {
+  const platform = os.platform()
+  if (platform === 'darwin') {
+    LIBJPEG_INCLUDE = `${ARTOOLKIT5_ROOT}/include/macosx-universal/`
+  } else if (platform === 'win32') {
+    LIBJPEG_INCLUDE = `${ARTOOLKIT5_ROOT}/include/win64-x64/`
+  }
+}
 
 if (!EMSCRIPTEN_ROOT) {
 	console.log("\nWarning: EMSCRIPTEN environment variable not found.")
@@ -130,6 +142,7 @@ var FLAGS = '' + OPTIMIZE_FLAGS;
 FLAGS += ' -Wno-warn-absolute-paths ';
 FLAGS += ' -s TOTAL_MEMORY=' + MEM + ' ';
 FLAGS += ' -s USE_ZLIB=1';
+FLAGS += ' -s USE_LIBJPEG';
 FLAGS += ' --memory-init-file 0 '; // for memless file
 // FLAGS += ' -s BINARYEN_TRAP_MODE=clamp'
 
@@ -151,7 +164,7 @@ var INCLUDES = [
     OUTPUT_PATH,
     SOURCE_PATH,
     path.resolve(__dirname, ARTOOLKIT5_ROOT + '/lib/SRC/KPM/FreakMatcher'),
-    path.resolve(__dirname, ARTOOLKIT5_ROOT + '/../libjpeg'),
+    path.resolve(__dirname, LIBJPEG_INCLUDE),
 ].map(function(s) { return '-I' + s }).join(' ');
 
 function format(str) {
@@ -162,19 +175,9 @@ function format(str) {
 }
 
 
-// Lib JPEG Compilation
-
 // Memory Allocations
 // jmemansi.c jmemname.c jmemnobs.c jmemdos.c jmemmac.c
-var libjpeg_sources = 'jcapimin.c jcapistd.c jccoefct.c jccolor.c jcdctmgr.c jchuff.c \
-		jcinit.c jcmainct.c jcmarker.c jcmaster.c jcomapi.c jcparam.c \
-		jcphuff.c jcprepct.c jcsample.c jctrans.c jdapimin.c jdapistd.c \
-		jdatadst.c jdatasrc.c jdcoefct.c jdcolor.c jddctmgr.c jdhuff.c \
-		jdinput.c jdmainct.c jdmarker.c jdmaster.c jdmerge.c jdphuff.c \
-		jdpostct.c jdsample.c jdtrans.c jerror.c jfdctflt.c jfdctfst.c \
-		jfdctint.c jidctflt.c jidctfst.c jidctint.c jidctred.c jquant1.c \
-		jquant2.c jutils.c jmemmgr.c \
-		jmemansi.c'.split(/\s+/).join(' ' + process.env.LIBJPEG_ROOT + '/');
+
 function clean_builds() {
     try {
         var stats = fs.statSync(OUTPUT_PATH);
@@ -204,27 +207,22 @@ var compile_kpm = format(EMCC + ' ' + INCLUDES + ' '
     + FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}libkpm.bc ',
     OUTPUT_PATH);
 
-var compile_libjpeg = format(EMCC + ' ' + INCLUDES + ' '
-    + path.resolve(__dirname, LIBJPEG_ROOT) + '/' + libjpeg_sources
-    + FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}libjpeg.bc ',
-    OUTPUT_PATH);
-
-var ALL_BC = " {OUTPUT_PATH}libar.bc {OUTPUT_PATH}libjpeg.bc ";
+var ALL_BC = " {OUTPUT_PATH}libar.bc ";
 
 var compile_combine = format(EMCC + ' ' + INCLUDES + ' '
     + ALL_BC + MAIN_SOURCES
     + FLAGS + ' -s WASM=0' + ' '  + DEBUG_FLAGS + DEFINES + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
-    OUTPUT_PATH, OUTPUT_PATH, OUTPUT_PATH, BUILD_DEBUG_FILE);
+    OUTPUT_PATH, OUTPUT_PATH, BUILD_DEBUG_FILE);
 
 var compile_combine_min = format(EMCC + ' ' + INCLUDES + ' '
     + ALL_BC + MAIN_SOURCES
     + FLAGS + ' -s WASM=0' + ' ' + DEFINES + PRE_FLAGS + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
-    OUTPUT_PATH, OUTPUT_PATH, OUTPUT_PATH, BUILD_MIN_FILE);
+    OUTPUT_PATH, OUTPUT_PATH, BUILD_MIN_FILE);
 
 var compile_wasm = format(EMCC + ' ' + INCLUDES + ' '
     + ALL_BC + MAIN_SOURCES
     + FLAGS + DEFINES + PRE_FLAGS + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
-    OUTPUT_PATH, OUTPUT_PATH, OUTPUT_PATH, BUILD_WASM_FILE);
+    OUTPUT_PATH, OUTPUT_PATH, BUILD_WASM_FILE);
 
 var compile_all = format(EMCC + ' ' + INCLUDES + ' '
     + ar_sources.join(' ')
@@ -273,7 +271,6 @@ addJob(clean_builds);
 addJob(compile_arlib);
 //addJob(compile_kpm);
 // compile_kpm
-addJob(compile_libjpeg);
 addJob(compile_combine);
 addJob(compile_wasm);
 addJob(compile_combine_min);
