@@ -2,7 +2,7 @@
 <body>
 
 <script src="js/third_party/three.js/three.min.js"></script>
-<script async src="../build/artoolkitNft.debug.js"></script>
+<script async src="../build/artoolkit.debug.js"></script>
 <script src="../js/artoolkit.api.js"></script>
 
 
@@ -132,7 +132,7 @@ function tick() {
 tick();
 
 var cameraParam = new ARCameraParam();
-cameraParam.onload = function() {
+cameraParam.onload = async function() {
 
 	arController = new ARController(320, 240, cameraParam);
 	arController.debugSetup();

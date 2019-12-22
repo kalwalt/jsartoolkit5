@@ -1,50 +1,57 @@
-/**
-	ARToolKit Web Worker proxy.
-*/
+importScripts('../build/artoolkit.min.js');
 
-importScripts("../build/artoolkitNft.min.js");
-
-WorkerARControllers = {};
-WorkerARControllerID = 0;
-
-callbackMethods = {
-    'loadNFTMarker': 1,
-    'loadMarker': 1,
-    'loadMultiMarker': 1
-};
-
-onmessage = function (ev) {
-    if (ev.data.method === 'new') {
-        var arController = new ARController(ev.data.arguments[0], ev.data.arguments[1], ev.data.arguments[2]);
-        var id = WorkerARControllerID++;
-        WorkerARControllers[id] = arController;
-        var eventProxy = function (ev) {
-            ev.target = id;
-            postMessage({ event: ev });
-        };
-        ['load', 'markerNum', 'getNFTMarker', 'lostNFTMarker', 'getMarker', 'detectNFTMarker', 'getMultiMarker', 'getMultiMarkerSub'].forEach(function (n) {
-            arController.addEventListener(n, eventProxy);
-        });
-        postMessage({ method: 'new', id: id, callID: ev.data.callID });
-
-    } else if (ev.data.method === 'dispose') {
-        var arController = WorkerARControllers[ev.data.id];
-        arController.dispose();
-        delete WorkerARControllers[ev.data.id];
-        postMessage({ method: 'dispose', id: ev.data.id, callID: ev.data.callID });
-
-    } else {
-        var arController = WorkerARControllers[ev.data.id];
-        if (callbackMethods[ev.data.method]) {
-            ev.data.arguments.push(function () {
-                var args = Array.prototype.slice.call(arguments)
-                postMessage({ method: ev.data.method, result: args, id: ev.data.id, callID: ev.data.callID });
-            });
-            arController[ev.data.method].apply(arController, ev.data.arguments);
-        } else {
-            var result = arController[ev.data.method].apply(arController, ev.data.arguments);
-            postMessage({ method: ev.data.method, result: result, id: ev.data.id, callID: ev.data.callID });
+self.onmessage = e => {
+    let msg = e.data;
+    switch (msg.type) {
+        case "load": {
+            load(msg);
+            return;
+        }
+        case "process": {
+            next = msg.imagedata;
+            process();
+            return;
         }
     }
-
 };
+
+let next = null;
+
+let ar = null;
+let markerResult = null;
+
+function load(msg) {
+    let param = new ARCameraParam(msg.camera_para);
+    param.onload = function () {
+        ar = new ARController(msg.pw, msg.ph, param);
+        let cameraMatrix = ar.getCameraMatrix();
+
+        ar.addEventListener('getNFTMarker', function (ev) {
+            markerResult = {type: "found", matrixGL_RH: JSON.stringify(ev.data.matrixGL_RH), proj: JSON.stringify(cameraMatrix)};
+        });
+
+        ar.loadNFTMarker(msg.marker, function (markerId) {
+            ar.trackNFTMarkerId(markerId, 2);
+            console.log("loadNFTMarker -> ", markerId);
+        });
+
+        postMessage({type: "loaded", proj: JSON.stringify(cameraMatrix)});
+    };
+}
+
+function process() {
+
+    markerResult = null;
+
+    if (ar) {
+        ar.process(next);
+    }
+
+    if (markerResult) {
+        postMessage(markerResult);
+    } else {
+        postMessage({type: "not found"});
+    }
+
+    next = null;
+}

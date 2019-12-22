@@ -374,7 +374,7 @@
 		and customizable marker widths.
 
 		@param {number} id ID of the pattern marker to track.
-		@param {number} markerWidth The width of the marker to track.
+		@param {number} [markerWidth] The width of the marker to track.
 		@return {Object} The marker tracking object.
 	*/
     ARController.prototype.trackPatternMarkerId = function (id, markerWidth) {
@@ -403,7 +403,7 @@
 		and customizable marker widths.
 
 		@param {number} id ID of the barcode marker to track.
-		@param {number} markerWidth The width of the marker to track.
+		@param {number} [markerWidth] The width of the marker to track.
 		@return {Object} The marker tracking object.
 	*/
     ARController.prototype.trackBarcodeMarkerId = function (id, markerWidth) {
@@ -630,7 +630,6 @@
 	 * checked.
 	 *
 	 * @param {number} markerUID	The unique identifier (UID) of the marker to query
-	 * @param {number} markerWidth	The width of the marker
 	 * @param {Float64Array} dst	The float array to populate with the 3x4 marker transformation matrix
 	 * @return	{Float64Array} The dst array.
 	 */
@@ -645,7 +644,6 @@
 	 * a call to detectMarker, all marker information will be current. Marker transformations can then be
 	 * checked.
 	 * @param {number} markerUID	The unique identifier (UID) of the marker to query
-	 * @param {number} markerWidth	The width of the marker
 	 * @param {Float64Array} dst	The float array to populate with the 3x4 marker transformation matrix
 	 * @return	{Float64Array} The dst array.
 	 */
@@ -828,6 +826,7 @@
 		A markerIndex of -1 is used to access the global custom marker.
 
 		@param {number} markerIndex The index of the marker to edit.
+	 	@param {*} vertexData
 	*/
     ARController.prototype.setMarkerInfoVertex = function (markerIndex, vertexData) {
         for (var i = 0; i < vertexData.length; i++) {
@@ -911,7 +910,7 @@
 	 * Enables or disables debug mode in the tracker. When enabled, a black and white debug
 	 * image is generated during marker detection. The debug image is useful for visualising
 	 * the binarization process and choosing a threshold value.
-	 * @param {number} debug		true to enable debug mode, false to disable debug mode
+	 * @param {boolean} mode		true to enable debug mode, false to disable debug mode
 	 * @see				getDebugMode()
 	 */
     ARController.prototype.setDebugMode = function (mode) {
@@ -920,8 +919,8 @@
 
 	/**
 	 * Returns whether debug mode is currently enabled.
-	 * @return			true when debug mode is enabled, false when debug mode is disabled
-	 * @see				setDebugMode()
+	 * @return {boolean}	true when debug mode is enabled, false when debug mode is disabled
+	 * @see					setDebugMode()
 	 */
     ARController.prototype.getDebugMode = function () {
         return artoolkit.getDebugMode(this.id);
@@ -1015,7 +1014,7 @@
 		suitable midpoint between the observed values for black
 		and white portions of the markers in the image.
 
-		@param {number}     thresh An integer in the range [0,255] (inclusive).
+		@param {number}     threshold An integer in the range [0,255] (inclusive).
 	*/
     ARController.prototype.setThreshold = function (threshold) {
         return artoolkit.setThreshold(this.id, threshold);
@@ -1062,8 +1061,8 @@
 			AR_TEMPLATE_MATCHING_MONO_AND_MATRIX
 			The default mode is AR_TEMPLATE_MATCHING_COLOR.
 	*/
-    ARController.prototype.setPatternDetectionMode = function (value) {
-        return artoolkit.setPatternDetectionMode(this.id, value);
+    ARController.prototype.setPatternDetectionMode = function (mode) {
+        return artoolkit.setPatternDetectionMode(this.id, mode);
     };
 
 	/**
@@ -1094,9 +1093,9 @@
 	        AR_MATRIX_CODE_4x4_BCH_13_5_5
 	        The default mode is AR_MATRIX_CODE_3x3.
 	*/
-    ARController.prototype.setMatrixCodeType = function (value) {
-        return artoolkit.setMatrixCodeType(this.id, value);
-    };
+	ARController.prototype.setMatrixCodeType = function(type) {
+		return artoolkit.setMatrixCodeType(this.id, type);
+	};
 
 	/**
 		Returns the current matrix code (2D barcode) marker detection type.
@@ -1123,9 +1122,9 @@
 			AR_LABELING_BLACK_REGION
 			The default mode is AR_LABELING_BLACK_REGION.
 	*/
-    ARController.prototype.setLabelingMode = function (value) {
-        return artoolkit.setLabelingMode(this.id, value);
-    };
+	ARController.prototype.setLabelingMode = function(mode) {
+		return artoolkit.setLabelingMode(this.id, mode);
+	};
 
 	/**
 		Enquire whether detection is looking for black markers or white markers.
@@ -1146,9 +1145,9 @@
 	        If compatibility with ARToolKit verions 1.0 through 4.4 is required, this value
 	        must be 0.5.
 	 */
-    ARController.prototype.setPattRatio = function (value) {
-        return artoolkit.setPattRatio(this.id, value);
-    };
+ 	ARController.prototype.setPattRatio = function(pattRatio) {
+		return artoolkit.setPattRatio(this.id, pattRatio);
+	};
 
 	/**
 		Returns the current ratio of the marker pattern to the total marker size.
@@ -1180,9 +1179,9 @@
 			AR_IMAGE_PROC_FIELD_IMAGE
 			The default mode is AR_IMAGE_PROC_FRAME_IMAGE.
 	*/
-    ARController.prototype.setImageProcMode = function (value) {
-        return artoolkit.setImageProcMode(this.id, value);
-    };
+	ARController.prototype.setImageProcMode = function(mode) {
+		return artoolkit.setImageProcMode(this.id, mode);
+	};
 
 	/**
 	    Get the image processing mode.
@@ -1369,17 +1368,18 @@
 				onSuccess : function(video),
 				onError : function(error),
 
-				width : number | {min: number, ideal: number, max: number},
-				height : number | {min: number, ideal: number, max: number},
+				width : number | {min: number, max: number},
+				height : number | {min: number, max: number},
 
-				facingMode : 'environment' | 'user' | 'left' | 'right' | { exact: 'environment' | ... }
+                facingMode : 'environment' | 'user' | 'left' | 'right' | { exact: 'environment' | ... }
+                deviceId : string | {exact: 'string'}
 			}
 
 		See https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia for more information about the
 		width, height and facingMode attributes.
 
 		@param {object} configuration The configuration object.
-		@return {VideoElement} Returns the created video element.
+		@return {HTMLVideoElement} Returns the created video element.
 	*/
     ARController.getUserMedia = function (configuration) {
         var facing = configuration.facingMode || 'environment';
@@ -1554,7 +1554,7 @@
 		are set to be always in landscape configuration so that width is larger than height.
 
 		@param {object} configuration The configuration object.
-		@return {VideoElement} Returns the created video element.
+		@return {HTMLVideoElement} Returns the created video element.
 	*/
     ARController.getUserMediaARController = function (configuration) {
         var obj = {};
@@ -1625,8 +1625,8 @@
 		@constructor
 
 		@param {string} src URL to load camera parameters from.
-		@param {string} onload Onload callback to be called on successful parameter loading.
-		@param {string} onerror Error callback to called when things don't work out.
+		@param {Function} onload Onload callback to be called on successful parameter loading.
+		@param {Function} onerror Error callback to called when things don't work out.
 	*/
     var ARCameraParam = function (src, onload, onerror) {
         this.id = -1;

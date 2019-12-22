@@ -1,0 +1,113 @@
+<html>
+    <body>
+
+        <script src="js/third_party/babylon.js/babylon.2.5.max.js"></script>
+        <script async src="../build/artoolkit.debug.js"></script>
+        <script src="../js/artoolkit.api.js"></script>
+
+        <canvas id="renderCanvas"></canvas>
+        <video id="v" src="Data/output_4.ogg" width="320" height="240" loop="" controls="" autoplay
+               webkit-playsinline></video>
+
+        <script>
+            var v = document.getElementById('v');
+
+            // get the canvas DOM element
+            var canvas = document.getElementById('renderCanvas');
+            canvas.height = v.height;
+            canvas.width = v.width;
+
+            // load the 3D engine
+            var engine = new BABYLON.Engine(canvas, true);
+            engine.setSize(v.width, v.height);
+
+            var markerRoot;
+            var camera;
+
+            // createScene function that creates and return the scene
+            var createScene = function () {
+                // create a basic BJS Scene object
+                var scene = new BABYLON.Scene(engine);
+                scene.useRightHandedSystem = true;
+
+                camera = new BABYLON.Camera('camera1', new BABYLON.Vector3(0, 0, 0), scene);
+
+                camera.attachControl(canvas, true);
+                window.camera = camera;
+
+                markerRoot = new BABYLON.AbstractMesh('markerRoot', scene);
+
+                markerRoot.wasVisible = false;
+                markerRoot.markerMatrix = new Float64Array(12);
+
+                // create a basic light, aiming 0,1,0 - meaning, to the sky
+                var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0, 1, 0), scene);
+
+                // create a box
+                var box = BABYLON.Mesh.CreateBox('box1', 1, scene);
+                //set the marker object as box parent
+                box.parent = markerRoot;
+
+                // return the created scene
+                return scene;
+            };
+
+            // call the createScene function
+            var scene = createScene();
+
+            var arController = null;
+
+            // run the render loop
+            engine.runRenderLoop(function () {
+                if (!arController) {
+                    return;
+                }
+
+                arController.detectMarker(v);
+                var markerNum = arController.getMarkerNum();
+
+                if (markerNum > 0) {
+
+                    if (markerRoot.isVisible) {
+                        arController.getTransMatSquareCont(0, 1, markerRoot.markerMatrix, markerRoot.markerMatrix);
+                    } else {
+                        arController.getTransMatSquare(0 /* Marker index */, 1 /* Marker width */, markerRoot.markerMatrix);
+                    }
+
+                    markerRoot.isVisible = true;
+                    markerRoot.getChildMeshes().forEach(function (mesh) {
+                        mesh.isVisible = true
+                    });
+
+                    arController.arglCameraViewRHf(arController.transMatToGLMat(markerRoot.markerMatrix), markerRoot._worldMatrix.m);
+                } else {
+                    markerRoot.isVisible = false;
+                    markerRoot.getChildMeshes().forEach(function (mesh) {
+                        mesh.isVisible = false;
+                    });
+                }
+
+                arController.debugDraw();
+
+                scene.render();
+            });
+
+
+            var cameraParam = new ARCameraParam();
+            cameraParam.onload = async function () {
+
+                arController = new ARController(320, 240, cameraParam);
+                arController.debugSetup();
+
+                camera.freezeProjectionMatrix(BABYLON.Matrix.FromArray(arController.getCameraMatrix()));
+            };
+            cameraParam.load('Data/camera_para.dat');
+
+
+            // the canvas/window resize event handler
+            window.addEventListener('resize', function () {
+                engine.resize();
+            });
+        </script>
+    </body>
+</html>

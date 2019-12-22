@@ -260,7 +260,7 @@ arController.addEventListener('getMarker', function(ev) {
 		markerRoot.visible = true;
 
 		// Copy the marker transformation matrix to the markerRoot matrix.
-		markerRoot.matrix.elements.set(ev.matrix);
+		markerRoot.matrix.set(ev.matrix);
 
 	}
 });
@@ -288,8 +288,8 @@ camera.matrixAutoUpdate = false;
 
 // Set the camera matrix to the AR camera matrix.
 //
-camera.matrix.elements.set(arController.getCameraMatrix());
 
+camera.projectionMatrix.fromArray(arController.getCameraMatrix());
 // On each frame, detect markers, update their positions and
 // render the frame on the renderer.
 //
@@ -312,7 +312,7 @@ tick();
 <p>Don't let the above scare you, it's just got a lot of comments for a few lines of code. That takes care of rendering the AR scene on renderer and tracking a barcode marker. You probably also want to overlay the AR scene on top of the video feed. Let's add that. Nothing too complicated, just drawing a plane with the video on it before anything else.
 
 <pre class="prettyprint"><code>// To display the video, first create a texture from it.
-var videoTex = new THREE.Texture(video);
+var videoTex = new THREE.VideoTexture(video);
 
 // Use linear downscaling for videoTex
 // (otherwise it needs to be power-of-two sized and you

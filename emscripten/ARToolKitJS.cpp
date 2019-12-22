@@ -1,3 +1,14 @@
+/*
+    ** From: ar.h L:94 **
+    #ifdef ARDOUBLE_IS_FLOAT
+    typedef float             ARdouble;
+    #else
+    typedef double            ARdouble;
+    #endif
+
+    ** According to config.h ARDOUBLE_IS_FLOAT is false when compiling with emscripten. This means we are dealing with 64bit float
+*/
+
 #include <stdio.h>
 #include <AR/ar.h>
 //#include <AR/gsub_lite.h>
@@ -350,6 +361,12 @@ extern "C" {
 	int teardown(int id) {
 		if (arControllers.find(id) == arControllers.end()) { return -1; }
 		arController *arc = &(arControllers[id]);
+
+        //TODO: Fix Cleanup luma.
+        // if(arc->videoLuma) {
+        //     free(arc->videoLuma);
+        //     arc->videoLuma = NULL;
+        // }
 
 		if (arc->videoFrame) {
 			free(arc->videoFrame);
@@ -895,6 +912,7 @@ extern "C" {
 		return arDetectMarker( arc->arhandle, &buff);
 	}
 
+
 	int getMarkerNum(int id) {
 		if (arControllers.find(id) == arControllers.end()) { return ARCONTROLLER_NOT_FOUND; }
 		arController *arc = &(arControllers[id]);
@@ -1090,6 +1108,7 @@ extern "C" {
 			gTransform,
 			arc->videoLuma          //$5
 		);
+
 
 		return arc->id;
 	}

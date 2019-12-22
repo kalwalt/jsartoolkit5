@@ -34,7 +34,10 @@
   },
   "scripts": {
     "build": "node tools/makem.js; echo Built at `date`",
-    "watch": "./node_modules/.bin/watch 'npm run build' ./js/"
+    "watch": "./node_modules/.bin/watch 'npm run build' ./js/",
+    "create-doc": "grunt jsdoc",
+    "test": "http-server -p 8085",
+    "open-test": "opener http://localhost:8085/tests/index.html"
   },
   "license": "LGPL-3.0"
 }

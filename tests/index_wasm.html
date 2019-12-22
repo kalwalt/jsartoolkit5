@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>JSARToolKit QUnit tests</title>
+  <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.4.1.css">
+</head>
+<body>
+        <h1>Remarks regarding tests</h1>
+        <ul>
+          <li>All test work on Android Chrome version 63.0.3239.111</li>
+          <li>On Android Firefox 57.0.4 test 10 fails because of switched video resolution</li>
+          <li>On iOS only Safari allows access to the video (as of 2018-01-08). The tests 9-11 fail because of switched camera resolution.</li>
+          <li>Chrome (Version 63.0.3239.108 and Version 63.0.3239.132) on desktop all tests work.</li>
+          <li>Firefox (Version 57.0.1 and 57.0.4) on desktop all tests work.</li>
+          <li>Safari (Version 11.0.2) on desktop all tests work</li>
+        </ul>
+        <h2>Important: You need to use https protocol for the tests.</h2>
+         <div>See startServer-https.md for a documentation how to do that on MacOS.</div>
+         
+         <img id="v1" src="./img.jpg"></img>
+
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+
+
+
+</div>
+  <script src="https://code.jquery.com/qunit/qunit-2.4.1.js"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+  integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g="
+  crossorigin="anonymous"></script>
+  <!-- <script src="../build/artoolkit.min.js"></script> -->
+
+  <!-- <script src="../build/artoolkit.debug.js"></script>
+  <script src="../js/artoolkit.api.js"></script> -->
+
+<script type='text/javascript'>
+    var artoolkit_wasm_url = '../build/artoolkit_wasm.wasm';
+</script>
+<script src="../build/artoolkit_wasm.js"></script>
+<script src="./papaparse.min.js"></script>
+<script src="./tests_wasm.js"></script>
+
+</body>
+</html>

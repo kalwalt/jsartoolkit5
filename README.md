@@ -2,6 +2,13 @@
 
 Emscripten port of [ARToolKit](https://github.com/artoolkit/artoolkit5) to JavaScript.
 
+---
+**NOTE:**
+
+When writing JavaScript and making changes be aware that the emscripten uglifier does not support the ES6 syntax.
+
+---
+
 ## Project Structure
 
 - `build/` (compiled debug and minified versions of ARToolKit.js)
@@ -11,12 +18,47 @@ Emscripten port of [ARToolKit](https://github.com/artoolkit/artoolkit5) to JavaS
 - `js/` (compiled versions of ARToolKit.js with Three.js helper api)
 - `tools/` (build scripts for building ARToolKit.js)
 
+## WebAssembly
+JSARToolKit5 supports WebAssembly. The libary builds two WebAssembly artefacts during the build process. These are ```build/artoolkit_wasm.js``` and ```build/artoolkit_wasm.wasm```. To use those include the artoolkit_wasm.js into your html page and define ```var artoolkit_wasm_url = '<<PATH TO>>/artoolkit_wasm.wasm';``` prior to loading the artoolkit_wasm.js file, like so:
+
+```js
+<script type='text/javascript'>
+      var artoolkit_wasm_url = '../build/artoolkit_wasm.wasm';
+</script>
+<script src="../build/artoolkit_wasm.js"></script>
+```
+As loading the WebAssembly artefact is done asynchronous there is a callback that is called once everything is ready.
+
+```js
+window.addEventListener('artoolkit-loaded', () => {  
+    //do artoolkit stuff here
+});
+```
+See examples/simple_image_wasm.html for details.
+
+## Clone the repository
+
+1. Clone this repository
+2. Clone ARToolKit5 project to get the latest source files. From within jsartoolkit5 directory do `git submodule update --init`. If you already cloned ARToolKit5 to a different directory you can:
+  - create a link in the `jsartoolkit5/emscripten/` directory that points to ARToolKit5 (`jsartoolkit5/emscripten/artoolkit5`) (Linux and macOS only)
+  - or, set the `ARTOOLKIT5_ROOT` environment variable to point to your ARToolKit5 clone
+  - or, change the `tools/makem.js` file to point to your artoolkit5 clone (line 62, 83, 107, 140)
+
 ## Build Instructions
+
+### Build using Docker
+1. Install Docker (if you havn't already) [Docker](https://www.docker.com/) -> Get Docker
+3. From inside jsartoolkit5 directory run `docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten-slim:sdk-tag-1.37.34-64bit bash`
+4. `docker exec emscripten npm run build`
+
+
+### Build with manual emscripten setup
 
 1. Install build tools
   1. Install node.js (https://nodejs.org/en/)
   2. Install python2 (https://www.python.org/downloads/)
-  3. Install emscripten (http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#download-and-install)
+  3. Install emscripten (https://emscripten.org/docs/getting_started/downloads.html#download-and-install)
+     We used emscripten version **1.38.44-fastcomp**
 
 jsartoolkit5 aim is to create a Javascript version of artoolkit5. First, you need the artoolkit5 repository on your machine:
 2. Clone ARToolKit5 project to get the latest source files. From within jsartoolkit5 directory do `git submodule update --init`. If you already cloned ARToolKit5 to a different directory you can:
@@ -34,7 +76,8 @@ jsartoolkit5 aim is to create a Javascript version of artoolkit5. First, you nee
 5. Building
   1. Make sure `EMSCRIPTEN` env variable is set (e.g. `EMSCRIPTEN=/usr/lib/emsdk_portable/emscripten/master/ node tools/makem.js`
   2. Rename the `ARTOOLKIT5_ROOT/include/AR/config.h.in` file to `config.h`
-  3. Run `npm run build`
+  3. Run `npm install`
+  4. Run `npm run build`
 
 Troubleshootings:
   - If you get errors about `BINARYEN_TRAP_MODE`, comment/de-comment following line on `makem.js` file: `FLAGS += ' -s BINARYEN_TRAP_MODE=clamp'`

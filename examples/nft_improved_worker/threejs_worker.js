@@ -7,7 +7,7 @@ let markers = {
         width: 1637,
         height: 2048,
         dpi: 215,
-        url: "../DataNFT/pinball",
+        url: "./examples/DataNFT/pinball",
     },
 };
 
@@ -31,6 +31,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     let pw, ph;
     let ox, oy;
     let worker;
+    let camera_para = '../../examples/Data/camera_para-iPhone 5 rear 640x480 1.0m.dat'
 
     let canvas_process = document.createElement('canvas');
     let context_process = canvas_process.getContext('2d');
@@ -95,9 +96,9 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
 
         renderer.setSize(sw, sh);
 
-        worker = new Worker('nft/worker.js');
+        worker = new Worker('../../js/artoolkit.worker.js');
 
-        worker.postMessage({ type: "load", pw: pw, ph: ph, marker: '../' + marker.url });
+        worker.postMessage({ type: "load", pw: pw, ph: ph, camera_para: camera_para, marker: '../' + marker.url });
 
         worker.onmessage = (ev) => {
             let msg = ev.data;
