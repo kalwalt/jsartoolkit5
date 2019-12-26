@@ -53,7 +53,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     let pw, ph;
     let ox, oy;
     let worker;
-    let camera_para = '../../examples/Data/camera_para-iPhone 5 rear 640x480 1.0m.dat'
+    let camera_para = './../examples/Data/camera_para-iPhone 5 rear 640x480 1.0m.dat'
 
 
 
