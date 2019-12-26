@@ -142,9 +142,8 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
                     setMatrix(camera.projectionMatrix, proj);
 
                     // removing loader page if present
-                    if (greyCover && greyCover.parentElement) {
-                        greyCover.parentElement.removeChild(greyCover);
-                    }
+                    document.body.classList.remove( 'loading' );
+
                     break;
                 }
                 case "found": {
