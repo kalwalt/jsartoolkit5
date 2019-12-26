@@ -145,7 +145,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
 
         worker = new Worker('../../js/artoolkit.worker.js');
 
-        worker.postMessage({ type: "load", pw: pw, ph: ph, camera_para: camera_para, marker: '../' + marker.url });
+        worker.postMessage({ type: "load", pw: pw, ph: ph, camera_para: camera_para, marker: marker.url });
 
         worker.onmessage = (ev) => {
             let msg = ev.data;
