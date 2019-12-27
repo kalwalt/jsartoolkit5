@@ -146,6 +146,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
                     if(msg.end == true)
                     // removing loader page if present
                     document.body.classList.remove( 'loading' );
+                    document.getElementById('loading').remove();
                     break;
                 }
                 case "found": {
@@ -162,9 +163,14 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
         };
     };
 
-    let lastmsg = null;
-    let found = (msg) => {
-        lastmsg = msg;
+    let world;
+
+    let found = ( msg ) => {
+        if( !msg ) {
+            world = null;
+        } else {
+            world = JSON.parse( msg.matrixGL_RH );
+        }
     };
 
     let lasttime = Date.now();
@@ -172,23 +178,11 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
 
     let draw = () => {
         render_update();
-        let now = Date.now();
-        let dt = now - lasttime;
-        time += dt;
-        lasttime = now;
 
-        if (!lastmsg) {
+        if (!world) {
             plane.visible = false;
         } else {
-            let proj = JSON.parse(lastmsg.proj);
-            let world = JSON.parse(lastmsg.matrixGL_RH);
-
-            let width = marker.width;
-            let height = marker.height;
-            let dpi = marker.dpi;
-
-            let w = width / dpi * 2.54 * 10;
-            let h = height / dpi * 2.54 * 10;
+            plane.visible = true;
 
             // interpolate matrix
             for( let i = 0; i < 16; i++ ) {
@@ -197,7 +191,6 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
              }
 
             setMatrix( root.matrix, trackedMatrix.interpolated );
-            plane.visible = true;
         }
         renderer.render(scene, camera);
     };
