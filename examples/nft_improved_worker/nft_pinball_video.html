@@ -1,13 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>NFT marker example with Three.js</title>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="../css/video-style.css">
+    <meta charset="utf-8">
+    <title>NFT marker example with Three.js</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/video-style.css">
 </head>
 <body class="loading">
-	<div id="stats" class="ui stats">
+
+<!--
+==================
+STATS
+==================
+-->
+
+    <div id="stats" class="ui stats">
 
         <div id="stats1" class="stats-item">
             <p class="stats-item-title">
@@ -23,75 +31,130 @@
 
     </div>
 
-	<div id="app">
-			 <video
-					 loop
-					 autoplay
-					 muted
-					 playsinline
-					 id="video">
-			 </video>
+<!--
+==================
+CAMERA VIDEO & CANVAS
+==================
+-->
 
-			 <canvas id="canvas"></canvas>
-	 </div>
+    <div id="app">
+        <video
+            loop
+            autoplay
+            muted
+            playsinline
+            id="video">
+        </video>
 
-<video
+        <canvas id="canvas"></canvas>
+    </div>
+
+
+<!--
+==================
+VIDEO
+==================
+-->
+
+    <video
         loop
         autoplay
         muted
         playsinline
         id="arvideo">
-				<source src="../Data/video.mp4" type="video/mp4">
+        <source src="../Data/video.mp4" type="video/mp4">
     </video>
-<script src="../js/third_party/three.js/stats.min.js"></script>
-<script src="../js/third_party/three.js/three.min.js"></script>
-<script src="threejs_worker_pinball_video.js"></script>
-<script>
 
+
+    <a
+        href="https://raw.githubusercontent.com/artoolkit/artoolkit5/master/doc/Marker%20images/pinball.jpg"
+        class="ui marker"
+        target="_blank">
+        🖼 Marker Image
+    </a>
+
+
+		<script src="../js/third_party/three.js/stats.min.js"></script>
+		<script src="../js/third_party/three.js/three.min.js"></script>
+		<script src="threejs_worker_pinball_video.js"></script>
+
+    <script>
+
+
+/**
+ * STATS
+ */
 let statsMain = new Stats();
 statsMain.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.getElementById( 'stats1' ).appendChild( statsMain.dom );
+
 let statsWorker = new Stats();
 statsWorker.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.getElementById( 'stats2' ).appendChild( statsWorker.dom );
 
+
+/**
+ * APP / ELEMENTS
+ */
 let container = document.getElementById( 'app' );
 let video = document.getElementById( 'video' );
 let canvas = document.getElementById( 'canvas' );
 
-		if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-			let hint = {
-		 		audio: false,
-		 		video: true
- 			};
-				//if (isMobile()) {
-					if( window.innerWidth < 800 ) {
-						let width = ( window.innerWidth < window.innerHeight ) ? 240 : 360;
-		        let height = ( window.innerWidth < window.innerHeight ) ? 360 : 240;
 
-		        let aspectRatio = window.innerWidth / window.innerHeight;
+/**
+ * APP / VIDEO STREAM
+ */
+if( navigator.mediaDevices && navigator.mediaDevices.getUserMedia ) {
+    let hint = {
+        audio: false,
+        video: true
+    };
 
-						console.log( width, height );
-						hint = {
-             audio: false,
-             video: {
-                 facingMode: 'environment',
-                 width: { min: width, max: width }
-             },
-         };
-         console.log( hint );
-				}
-		//	}
+    if( window.innerWidth < 800 ) {
+        let width = ( window.innerWidth < window.innerHeight ) ? 240 : 360;
+        let height = ( window.innerWidth < window.innerHeight ) ? 360 : 240;
 
-				navigator.mediaDevices.getUserMedia({ video: hint }).then(function (stream) {
-						video.srcObject = stream;
-						video.addEventListener("loadedmetadata", () => {
-								video.play();
-								start(container, markers["pinball"], video, video.videoWidth, video.videoHeight, canvas, () => statsMain.update(), () => statsWorker.update(), null);
-						});
-				});
-		}
-</script>
+        let aspectRatio = window.innerWidth / window.innerHeight;
 
+        console.log( width, height );
+
+        hint = {
+            audio: false,
+            video: {
+                facingMode: 'environment',
+                width: { min: width, max: width }
+            },
+        };
+
+        console.log( hint );
+    }
+
+    navigator.mediaDevices.getUserMedia( hint ).then( function( stream ) {
+        video.srcObject = stream;
+        video.addEventListener( 'loadedmetadata', () => {
+            video.play();
+
+            console.log( 'video', video, video.videoWidth, video.videoHeight );
+
+            start(
+                container,
+                markers['pinball'],
+                video,
+                video.videoWidth,
+                video.videoHeight,
+                canvas,
+                function() {
+                    statsMain.update()
+                },
+                function() {
+                    statsWorker.update();
+                },
+                null
+            );
+        } );
+    } );
+}
+
+    </script>
 </body>
 </html>

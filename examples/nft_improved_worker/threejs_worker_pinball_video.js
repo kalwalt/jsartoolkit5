@@ -140,10 +140,12 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
                     proj[9] *= ratioH;
                     proj[13] *= ratioH;
                     setMatrix(camera.projectionMatrix, proj);
-
+                    break;
+                }
+                case "endLoading":{
+                    if(msg.end == true)
                     // removing loader page if present
                     document.body.classList.remove( 'loading' );
-
                     break;
                 }
                 case "found": {

@@ -34,6 +34,7 @@ function load(msg) {
         ar.loadNFTMarker(msg.marker, function (markerId) {
             ar.trackNFTMarkerId(markerId, 2);
             console.log("loadNFTMarker -> ", markerId);
+            postMessage({type: "endLoading", end: true})
         });
 
         postMessage({type: "loaded", proj: JSON.stringify(cameraMatrix)});
