@@ -46,13 +46,18 @@ See examples/simple_image_wasm.html for details.
 
 ## Build Instructions
 
-### Build using Docker
+### Recommended: Build using Docker
 1. Install Docker (if you havn't already) [Docker](https://www.docker.com/) -> Get Docker
-3. From inside jsartoolkit5 directory run `docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten-slim:sdk-tag-1.37.34-64bit bash`
-4. `docker exec emscripten npm run build`
+2. Clone artoolkit5 repository on your machine: `git submodule update --init`
+2. `npm install`
+3. From inside jsartoolkit5 directory run `docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten-slim:latest bash`
+4. `docker exec emscripten npm run build-local`
+5. `docker stop emscripten`
+6. The build artefacts are in `/build`. There's a build with debug symbols in `artoolkit.debug.js` and the optimized build with bundled JS API in `artoolkit.min.js` and a WebAssembly build artoolkit_wasm.js and artoolkit_wasm.wasm
 
-
-### Build with manual emscripten setup
+### Disencuraged: Build local with manual emscripten setup
+To prevent issues with Emscripten setup and to not have to maintain several build environments (macOS, Windows, Linux) we only maintain the **Build using Docker**. Following are the instructions of the last know build on Linux which we verified are working. **Use at own risk.**
+** Not working on macOS!**
 
 1. Install build tools
   1. Install node.js (https://nodejs.org/en/)

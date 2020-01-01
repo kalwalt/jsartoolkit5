@@ -25,6 +25,8 @@ if (!LIBJPEG_INCLUDE) {
     LIBJPEG_INCLUDE = `${ARTOOLKIT5_ROOT}/include/macosx-universal/`
   } else if (platform === 'win32') {
     LIBJPEG_INCLUDE = `${ARTOOLKIT5_ROOT}/include/win64-x64/`
+  } else {
+    LIBJPEG_INCLUDE = ''
   }
 }
 
@@ -164,9 +166,9 @@ var FLAGS = '' + OPTIMIZE_FLAGS;
 FLAGS += ' -Wno-warn-absolute-paths ';
 FLAGS += ' -s TOTAL_MEMORY=' + MEM + ' ';
 FLAGS += ' -s USE_ZLIB=1';
-//FLAGS += ' -s USE_LIBJPEG';
+FLAGS += ' -s USE_LIBJPEG';
 FLAGS += ' --memory-init-file 0 '; // for memless file
-// FLAGS += ' -s BINARYEN_TRAP_MODE=clamp'
+FLAGS += ' -s BINARYEN_TRAP_MODE=clamp'
 
 var PRE_FLAGS = ' --pre-js ' + path.resolve(__dirname, '../js/artoolkit.api.js') +' ';
 
@@ -225,7 +227,7 @@ var compile_kpm = format(EMCC + ' ' + INCLUDES + ' '
     + FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}libkpm.bc ',
     OUTPUT_PATH);
 
-var ALL_BC = " {OUTPUT_PATH}libar.bc " + SOURCE_PATH + "libjpeg/lib/libjpeg.bc ";
+var ALL_BC = " {OUTPUT_PATH}libar.bc ";
 
 var compile_combine = format(EMCC + ' ' + INCLUDES + ' '
     + ALL_BC + MAIN_SOURCES
