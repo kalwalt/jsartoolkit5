@@ -50,9 +50,11 @@ See examples/simple_image_wasm.html for details.
 1. Install Docker (if you havn't already) [Docker](https://www.docker.com/) -> Get Docker
 2. Clone artoolkit5 repository on your machine: `git submodule update --init`
 2. `npm install`
-3. From inside jsartoolkit5 directory run `docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten-slim:latest bash`
-4. `docker exec emscripten npm run build-local`
-5. `docker stop emscripten`
+3. From inside jsartoolkit5 directory run `docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten-slim:latest bash` - download and start the container, in preparation for the build
+4. `docker exec emscripten npm run build-local` - build JS version of artoolkit5
+5. `docker stop emscripten` - stop the container after the build if needed
+6. `docker rm emscripten` - remove the container
+6. `docker rmi trzeci/emscripten-slim:latest` - remove the image if you don't need it anymore
 6. The build artefacts are in `/build`. There's a build with debug symbols in `artoolkit.debug.js` and the optimized build with bundled JS API in `artoolkit.min.js` and a WebAssembly build artoolkit_wasm.js and artoolkit_wasm.wasm
 
 ### Disencuraged: Build local with manual emscripten setup
@@ -71,18 +73,10 @@ jsartoolkit5 aim is to create a Javascript version of artoolkit5. First, you nee
   - or, set the `ARTOOLKIT5_ROOT` environment variable to point to your ARToolKit5 clone
   - or, change the `tools/makem.js` file to point to your artoolkit5 clone (line 62, 83, 107, 140)
 
-3. Copy libjpeg-6b to emscripten/libjpeg
-  - or, set the `LIBJPEG_ROOT` environment variable to point to your libjpeg source directory
-
-  You can use the following version (tested recently) of libjpeg: (https://github.com/kalwalt/libjpeg-for-jsartoolkit5)
-
-4. Set the `LIBJPEG_ROOT` variable - if you have not done it before - to the local path of your libjpeg (which you have cloned in the previous step)
-
 5. Building
   1. Make sure `EMSCRIPTEN` env variable is set (e.g. `EMSCRIPTEN=/usr/lib/emsdk_portable/emscripten/master/ node tools/makem.js`
-  2. Rename the `ARTOOLKIT5_ROOT/include/AR/config.h.in` file to `config.h`
   3. Run `npm install`
-  4. Run `npm run build`
+  4. Run `npm run build-local`
 
 Troubleshootings:
   - If you get errors about `BINARYEN_TRAP_MODE`, comment/de-comment following line on `makem.js` file: `FLAGS += ' -s BINARYEN_TRAP_MODE=clamp'`
