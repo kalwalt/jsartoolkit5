@@ -18,17 +18,6 @@ var HAVE_NFT = 1;
 
 var EMSCRIPTEN_ROOT = process.env.EMSCRIPTEN;
 var ARTOOLKIT5_ROOT = process.env.ARTOOLKIT5_ROOT || path.resolve(__dirname, "../emscripten/artoolkit5");
-var LIBJPEG_INCLUDE = process.env.LIBJPEG_ROOT;
-
-if (!LIBJPEG_INCLUDE) {
-  if (platform === 'darwin') {
-    LIBJPEG_INCLUDE = `${ARTOOLKIT5_ROOT}/include/macosx-universal/`
-  } else if (platform === 'win32') {
-    LIBJPEG_INCLUDE = `${ARTOOLKIT5_ROOT}/include/win64-x64/`
-  } else {
-    LIBJPEG_INCLUDE = ''
-  }
-}
 
 if (!EMSCRIPTEN_ROOT) {
 	console.log("\nWarning: EMSCRIPTEN environment variable not found.")
@@ -188,7 +177,6 @@ var INCLUDES = [
     OUTPUT_PATH,
     SOURCE_PATH,
     path.resolve(__dirname, ARTOOLKIT5_ROOT + '/lib/SRC/KPM/FreakMatcher'),
-    path.resolve(__dirname, LIBJPEG_INCLUDE),
 ].map(function(s) { return '-I' + s }).join(' ');
 
 function format(str) {
