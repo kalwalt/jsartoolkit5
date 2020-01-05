@@ -79,9 +79,9 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     var planeGeom = new THREE.PlaneGeometry(1,1,1,1);
     var plane = new THREE.Mesh(planeGeom, mat);
   	plane.position.z = 0;
-  	plane.position.x = 40;
-  	plane.position.y = 40;
-  	plane.scale.set(80,80,80);
+  	plane.position.x = 90;
+  	plane.position.y = 90;
+  	plane.scale.set(180,180,180);
 
 
     root.matrixAutoUpdate = false;

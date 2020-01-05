@@ -1,4 +1,6 @@
 ; (function () {
+    'use strict'
+
     var scope;
     if (typeof window !== 'undefined') {
         scope = window;
@@ -1956,6 +1958,7 @@
     scope.artoolkit = artoolkit;
     scope.ARController = ARController;
     scope.ARCameraParam = ARCameraParam;
+    scope.Module = Module;
 
     if (scope.Module) {
         scope.Module.onRuntimeInitialized = function () {

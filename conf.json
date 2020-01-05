@@ -13,9 +13,9 @@
     "default": {
       "outputSourceFiles": true
     },
-    "systemName": "jsartoolkit",
+    "systemName": "jsartoolkit5",
     "footer": "",
-    "copyright": "Copyright 2016 <a href='https://github.com/artoolkit/jsartoolkit5' target='_blank'>jsartoolkit</a>",
+    "copyright": "Copyright 2019 <a href='https://github.com/artoolkitx/jsartoolkit5' target='_blank'>jsartoolkit</a>",
     "navType": "vertical",
     "outputSourceFiles": true,
     "theme": "paper",

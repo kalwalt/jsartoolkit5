@@ -46,13 +46,20 @@ See examples/simple_image_wasm.html for details.
 
 ## Build Instructions
 
-### Build using Docker
+### Recommended: Build using Docker
 1. Install Docker (if you havn't already) [Docker](https://www.docker.com/) -> Get Docker
-3. From inside jsartoolkit5 directory run `docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten-slim:sdk-tag-1.37.34-64bit bash`
-4. `docker exec emscripten npm run build`
+2. Clone artoolkit5 repository on your machine: `git submodule update --init`
+3. `npm install`
+4. From inside jsartoolkit5 directory run `docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten-slim:latest bash` - download and start the container, in preparation for the build
+5. `docker exec emscripten npm run build-local` - build JS version of artoolkit5
+6. `docker stop emscripten` - stop the container after the build if needed
+7. `docker rm emscripten` - remove the container
+8. `docker rmi trzeci/emscripten-slim:latest` - remove the image if you don't need it anymore
+9. The build artefacts are in `/build`. There's a build with debug symbols in `artoolkit.debug.js` and the optimized build with bundled JS API in `artoolkit.min.js` and a WebAssembly build artoolkit_wasm.js and artoolkit_wasm.wasm
 
-
-### Build with manual emscripten setup
+### !! Not recommended !! : Build local with manual emscripten setup
+To prevent issues with Emscripten setup and to not have to maintain several build environments (macOS, Windows, Linux) we only maintain the **Build using Docker**. Following are the instructions of the last know build on Linux which we verified are working. **Use at own risk.**
+** Not working on macOS!**
 
 1. Install build tools
   1. Install node.js (https://nodejs.org/en/)
@@ -66,25 +73,14 @@ jsartoolkit5 aim is to create a Javascript version of artoolkit5. First, you nee
   - or, set the `ARTOOLKIT5_ROOT` environment variable to point to your ARToolKit5 clone
   - or, change the `tools/makem.js` file to point to your artoolkit5 clone (line 62, 83, 107, 140)
 
-3. Copy libjpeg-6b to emscripten/libjpeg
-  - or, set the `LIBJPEG_ROOT` environment variable to point to your libjpeg source directory
-
-  You can use the following version (tested recently) of libjpeg: (https://github.com/kalwalt/libjpeg-for-jsartoolkit5)
-
-4. Set the `LIBJPEG_ROOT` variable - if you have not done it before - to the local path of your libjpeg (which you have cloned in the previous step)
-
-5. Building
+3. Building
   1. Make sure `EMSCRIPTEN` env variable is set (e.g. `EMSCRIPTEN=/usr/lib/emsdk_portable/emscripten/master/ node tools/makem.js`
-  2. Rename the `ARTOOLKIT5_ROOT/include/AR/config.h.in` file to `config.h`
   3. Run `npm install`
-  4. Run `npm run build`
-
-Troubleshootings:
-  - If you get errors about `BINARYEN_TRAP_MODE`, comment/de-comment following line on `makem.js` file: `FLAGS += ' -s BINARYEN_TRAP_MODE=clamp'`
+  4. Run `npm run build-local`
 
 During development, you can run ```npm run watch```, it will rebuild the library everytime you change ```./js/``` directory.
 
-6. The built ASM.js files are in `/build`. There's a build with debug symbols in `artoolkit.debug.js` and the optimized build with bundled JS API in `artoolkit.min.js`.
+4. The built ASM.js files are in `/build`. There's a build with debug symbols in `artoolkit.debug.js` and the optimized build with bundled JS API in `artoolkit.min.js`.
 
 # ARToolKit JS API
 

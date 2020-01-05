@@ -1,5 +1,5 @@
-//importScripts('../../vendor/jsartoolkit5/build/artoolkit.min.js');
 importScripts('../build/artoolkit.min.js');
+
 self.onmessage = function(e) {
     var msg = e.data;
     switch (msg.type) {
@@ -21,8 +21,9 @@ var ar = null;
 var markerResult = null;
 
 function load(msg) {
-    //var param = new ARCameraParam('../resources/camera_para-iPhone 5 rear 640x480 1.0m.dat');
+
     var param = new ARCameraParam(msg.camera_para);
+
     param.onload = function () {
         ar = new ARController(msg.pw, msg.ph, param);
         var cameraMatrix = ar.getCameraMatrix();
