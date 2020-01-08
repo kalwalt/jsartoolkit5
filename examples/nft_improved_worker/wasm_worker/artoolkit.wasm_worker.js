@@ -1,6 +1,5 @@
-var artoolkit_wasm_url = 'artoolkit_wasm.wasm';
-
 window = {};
+window.artoolkit_wasm_url = '../../../build/artoolkit_wasm.wasm';
 window.listeners = {};
 window.addEventListener = function (name, callback) {
     if (!window.listeners[name]) {

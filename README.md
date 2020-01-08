@@ -19,7 +19,8 @@ When writing JavaScript and making changes be aware that the emscripten uglifier
 - `tools/` (build scripts for building ARToolKit.js)
 
 ## WebAssembly
-JSARToolKit5 supports WebAssembly. The libary builds two WebAssembly artefacts during the build process. These are ```build/artoolkit_wasm.js``` and ```build/artoolkit_wasm.wasm```. To use those include the artoolkit_wasm.js into your html page and define ```var artoolkit_wasm_url = '<<PATH TO>>/artoolkit_wasm.wasm';``` prior to loading the artoolkit_wasm.js file, like so:
+
+JSARToolKit5 supports WebAssembly. The libary builds two WebAssembly artifacts during the build process. These are ```build/artoolkit_wasm.js``` and ```build/artoolkit_wasm.wasm```. To use those, include the artoolkit_wasm.js into your html page and define ```var artoolkit_wasm_url = '<<PATH TO>>/artoolkit_wasm.wasm';``` before loading the artoolkit_wasm.js file, like this:
 
 ```js
 <script type='text/javascript'>
@@ -27,10 +28,10 @@ JSARToolKit5 supports WebAssembly. The libary builds two WebAssembly artefacts d
 </script>
 <script src="../build/artoolkit_wasm.js"></script>
 ```
-As loading the WebAssembly artefact is done asynchronous there is a callback that is called once everything is ready.
+As loading the WebAssembly artifact is done asynchronously, there is a callback that is called when everything is ready.
 
 ```js
-window.addEventListener('artoolkit-loaded', () => {  
+window.addEventListener('artoolkit-loaded', () => {
     //do artoolkit stuff here
 });
 ```
@@ -44,20 +45,22 @@ See examples/simple_image_wasm.html for details.
   - or, set the `ARTOOLKIT5_ROOT` environment variable to point to your ARToolKit5 clone
   - or, change the `tools/makem.js` file to point to your artoolkit5 clone (line 62, 83, 107, 140)
 
-## Build Instructions
+## Build the project
 
 ### Recommended: Build using Docker
-1. Install Docker (if you havn't already) [Docker](https://www.docker.com/) -> Get Docker
+
+1. Install Docker (if you havn't already): [get Docker](https://www.docker.com/)
 2. Clone artoolkit5 repository on your machine: `git submodule update --init`
 3. `npm install`
-4. From inside jsartoolkit5 directory run `docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten-slim:latest bash` - download and start the container, in preparation for the build
-5. `docker exec emscripten npm run build-local` - build JS version of artoolkit5
-6. `docker stop emscripten` - stop the container after the build if needed
-7. `docker rm emscripten` - remove the container
-8. `docker rmi trzeci/emscripten-slim:latest` - remove the image if you don't need it anymore
-9. The build artefacts are in `/build`. There's a build with debug symbols in `artoolkit.debug.js` and the optimized build with bundled JS API in `artoolkit.min.js` and a WebAssembly build artoolkit_wasm.js and artoolkit_wasm.wasm
+4. From inside jsartoolkit5 directory run `docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten-slim:latest bash` to download and start the container, in preparation for the build
+5. `docker exec emscripten npm run build-local` to build JS version of artoolkit5
+6. `docker stop emscripten` to stop the container after the build, if needed
+7. `docker rm emscripten` to remove the container
+8. `docker rmi trzeci/emscripten-slim:latest` to remove the Docker image, if you don't need it anymore
+9. The build artifacts will appear in `/build`. There's a build with debug symbols in `artoolkit.debug.js` file and the optimized build with bundled JS API in `artoolkit.min.js`; also, a WebAssembly build artoolkit_wasm.js and artoolkit_wasm.wasm
 
-### !! Not recommended !! : Build local with manual emscripten setup
+### ⚠️ Not recommended ⚠️ : Build local with manual emscripten setup
+
 To prevent issues with Emscripten setup and to not have to maintain several build environments (macOS, Windows, Linux) we only maintain the **Build using Docker**. Following are the instructions of the last know build on Linux which we verified are working. **Use at own risk.**
 ** Not working on macOS!**
 

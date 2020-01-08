@@ -109,7 +109,7 @@ QUnit.test("Create ARController track image", assert => {
         arController.debugSetup();
         arController.addEventListener('getMarker', (trackableInfo) => {
             assert.ok(true, "Marker found");
-            assert.deepEqual(trackableInfo.marker.idMatrix,0);
+            assert.deepEqual(trackableInfo.data.marker.idMatrix,0);
         });
 
         arController.onload = (err) => {
@@ -447,7 +447,7 @@ QUnit.module("ARController.Test trackable registration",{
         this.video.src = null;
     }
 });
-QUnit.test("Register valid trackable", assert => {
+QUnit.test("Register valid square trackable", assert => {
 
     const done = assert.async();
     assert.timeout(5000);
@@ -487,7 +487,7 @@ QUnit.test("Register valid trackable", assert => {
     this.video = ARController.getUserMediaARController(config);
 
 });
-QUnit.test("Register invalid trackable", assert => {
+QUnit.test("Register invalid square trackable", assert => {
 
     const done = assert.async();
     assert.timeout(5000);
@@ -523,6 +523,123 @@ QUnit.test("Register invalid trackable", assert => {
     };
 
     this.video = ARController.getUserMediaARController(config);
+
+});
+QUnit.test("Register valid NFT trackable", assert => {
+
+  const done = assert.async();
+  assert.timeout(5000);
+
+  const loadMarkerSuccess = (markerId) => {
+      assert.ok(markerId >= 0);
+      done();
+  }
+  const loadMarkerError = error => {
+      assert.notOk(error);
+      done();
+  }
+
+
+  const successCallback = (arController, arCameraParam) => {
+      // add NFT marker string
+      arController.loadNFTMarker('../examples/DataNFT/pinball', loadMarkerSuccess, loadMarkerError);
+
+  };
+
+  const errorCallback = (error) => {
+      console.log("ERROR" + error);
+      assert.notOk(error, "Error while calling `getUserMediaARController`");
+      done();
+  }
+
+  const config = {
+      onSuccess : successCallback,
+      onError: errorCallback,
+      cameraParam: './camera_para.dat',
+      maxARVideoSize: 640,
+      width: 640,
+      height: 480,
+      facingMode: 'environment',
+  };
+
+  this.video = ARController.getUserMediaARController(config);
+
+});
+QUnit.test("Register invalid NFT trackable", assert => {
+
+  const done = assert.async();
+  assert.timeout(5000);
+
+  const loadMarkerSuccess = (markerId) => {
+      assert.ok(markerId >= 0);
+      done();
+  };
+  const loadMarkerError = error => {
+      assert.ok(error=404, 'Test with invalid pattern-URL');
+      done();
+  };
+
+  const successCallback = (arController, arCameraParam) => {
+      // add marker string
+      arController.loadNFTMarker('../examples/DataNFT/pinball-error', loadMarkerSuccess, loadMarkerError);
+  };
+
+  const errorCallback = (error) => {
+      console.log("ERROR" + error);
+      assert.notOk(error, "Error while calling `getUserMediaARController`");
+      done();
+  };
+
+  const config = {
+      onSuccess : successCallback,
+      onError: errorCallback,
+      cameraParam: './camera_para.dat',
+      maxARVideoSize: 640,
+      width: 640,
+      height: 480,
+      facingMode: 'environment',
+  };
+
+  this.video = ARController.getUserMediaARController(config);
+
+});
+QUnit.test("Register empty URL NFT trackable", assert => {
+
+  const done = assert.async();
+  assert.timeout(5000);
+
+  const loadMarkerSuccess = (markerId) => {
+      assert.ok(markerId >= 0, 'MarkerId is greater or equals 0');
+      done();
+  };
+  const loadMarkerError = error => {
+      console.log(error);
+      assert.ok(error, 'Test with invalid pattern-URL');
+      done();
+  };
+
+  const successCallback = (arController, arCameraParam) => {
+      // add marker string
+      arController.loadNFTMarker("", loadMarkerSuccess, loadMarkerError);
+  };
+
+  const errorCallback = (error) => {
+      console.log("ERROR" + error);
+      assert.notOk(error, "Error while calling `getUserMediaARController`");
+      done();
+  };
+
+  const config = {
+      onSuccess : successCallback,
+      onError: errorCallback,
+      cameraParam: './camera_para.dat',
+      maxARVideoSize: 640,
+      width: 640,
+      height: 480,
+      facingMode: 'environment',
+  };
+
+  this.video = ARController.getUserMediaARController(config);
 
 });
 QUnit.test("Register empty URL trackable", assert => {

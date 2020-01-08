@@ -8,18 +8,20 @@
 
 <script>
 
-var arController = new ARController(320, 240, 'Data/camera_para.dat');
-arController.onload = function() {
+var interval = setTimeout(function() {
+	var arController = new ARController(320, 240, 'Data/camera_para.dat');
+		arController.onload = function() {
 
-	var video = document.getElementById('v');
+			var video = document.getElementById('v');
 
-	arController.debugSetup();
+			arController.debugSetup();
 
-	var interval = setInterval(function() {
-		arController.process(video);
-	}, 13);
+			var interval = setInterval(function() {
+				arController.process(video);
+			}, 13);
 
-};
+		};
+}, 200);
 
 </script>
 

@@ -35,6 +35,7 @@ function multiplyMatrices(a, b) {
 
     return te;
 }
+
 function transformPoint(m, xyz) {
     var x = xyz.x, y = xyz.y, z = xyz.z;
     var e = m;
@@ -134,6 +135,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     let time = 0;
 
     let x = 0;
+
     let draw = () => {
         context_draw.clearRect(0, 0, vw, vh);
         render_update();
@@ -146,7 +148,6 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
         x %= sw;
         context_draw.fillStyle = "#FFF";
         context_draw.fillRect(x, 0, 5, 10);
-
 
         if (!lastmsg) return;
         let proj = JSON.parse(lastmsg.proj);
@@ -183,7 +184,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
         context_draw.lineTo(p3.x, p3.y);
         context_draw.lineTo(p4.x, p4.y);
         context_draw.closePath();
-        context_draw.strokeStyle = "#FFF";
+        context_draw.strokeStyle = "red";
         context_draw.stroke();
     };
 

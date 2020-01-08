@@ -572,10 +572,20 @@
 	*/
     ARController.prototype.loadNFTMarker = function (markerURL, onSuccess, onError) {
         var self = this;
-        return artoolkit.addNFTMarker(this.id, markerURL, function (id) {
-            self.nftMarkerCount = id + 1;
-            onSuccess(id);
-        }, onError);
+        if (markerURL) {
+          return artoolkit.addNFTMarker(this.id, markerURL, function (id) {
+              self.nftMarkerCount = id + 1;
+              onSuccess(id);
+          }, onError);
+        } else {
+          if (onError) {
+              onError("Marker URL needs to be defined and not equal empty string!");
+          }
+          else {
+              console.error("Marker URL needs to be defined and not equal empty string!");
+          }
+        }
+
     };
 
 	/**
@@ -1800,7 +1810,7 @@
         }, function (errorNumber) { if (onError) onError(errorNumber) });
     }
 
-    function addNFTMarker(arId, url, callback) {
+    function addNFTMarker(arId, url, callback, onError) {
         var mId = marker_count++;
         var prefix = '/markerNFT_' + mId;
         var filename1 = prefix + '.fset';
@@ -1811,9 +1821,9 @@
                 ajax(url + '.fset3', filename3, function () {
                     var id = Module._addNFTMarker(arId, prefix);
                     if (callback) callback(id);
-                });
-            });
-        });
+                }, function (errorNumber) { if (onError) onError(errorNumber) });
+            }, function (errorNumber) { if (onError) onError(errorNumber) });
+        }, function (errorNumber) { if (onError) onError(errorNumber) });
     }
 
     function bytesToString(array) {
@@ -1958,7 +1968,9 @@
     scope.artoolkit = artoolkit;
     scope.ARController = ARController;
     scope.ARCameraParam = ARCameraParam;
-    scope.Module = Module;
+    if (scope.artoolkit_wasm_url) {
+      scope.Module = Module;
+    };
 
     if (scope.Module) {
         scope.Module.onRuntimeInitialized = function () {

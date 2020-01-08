@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="../css/video-style.css" />
   </head>
-  <body class="loading">
+  <body>
     <div id="loading">
       <img src="../Data/logo.gif" />
       <span class="loading-text">Loading, please wait</span>
@@ -81,30 +81,23 @@
         };
 
         if (window.innerWidth < 800) {
-          let width = window.innerWidth < window.innerHeight ? 240 : 360;
-          let height = window.innerWidth < window.innerHeight ? 360 : 240;
-
-          let aspectRatio = window.innerWidth / window.innerHeight;
-
-          console.log(width, height);
-
           hint = {
             audio: false,
             video: {
-              facingMode: "environment",
-              width: { min: width, max: width }
-            }
+                width: { ideal: 480 },
+                height: { ideal: 640 },
+                facingMode:
+                    { exact:
+                        "environment"
+                    }
+                },
           };
-
-          console.log(hint);
         }
 
         navigator.mediaDevices.getUserMedia(hint).then(function(stream) {
           video.srcObject = stream;
           video.addEventListener("loadedmetadata", () => {
             video.play();
-
-            console.log("video", video, video.videoWidth, video.videoHeight);
 
             start(
               container,

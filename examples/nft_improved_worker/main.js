@@ -176,7 +176,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
         context_draw.lineTo(p3.x, p3.y);
         context_draw.lineTo(p4.x, p4.y);
         context_draw.closePath();
-        context_draw.strokeStyle = "#FFF";
+        context_draw.strokeStyle = "red";
         context_draw.stroke();
     };
 

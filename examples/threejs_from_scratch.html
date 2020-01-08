@@ -131,23 +131,24 @@ function tick() {
 
 tick();
 
-var cameraParam = new ARCameraParam();
-cameraParam.onload = async function() {
+var interval = setTimeout(function() {
+	var cameraParam = new ARCameraParam();
+	cameraParam.onload = async function() {
 
-	arController = new ARController(320, 240, cameraParam);
-	arController.debugSetup();
+		arController = new ARController(320, 240, cameraParam);
+		arController.debugSetup();
 
-	var camera_mat = arController.getCameraMatrix();
+		var camera_mat = arController.getCameraMatrix();
 
-	if (USE_SHADER) {
-		shaderMaterial.uniforms.cameraMatrix.value.fromArray(camera_mat);
-	} else {
-		camera.projectionMatrix.fromArray(camera_mat);
-	}
+		if (USE_SHADER) {
+			shaderMaterial.uniforms.cameraMatrix.value.fromArray(camera_mat);
+		} else {
+			camera.projectionMatrix.fromArray(camera_mat);
+		}
 
-};
-cameraParam.load('Data/camera_para.dat');
-
+	};
+	cameraParam.load('Data/camera_para.dat');
+}, 200);
 
 </script>
 
