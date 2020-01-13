@@ -53,10 +53,10 @@ function isMobile() {
     return /Android|mobile|iPad|iPhone/i.test(navigator.userAgent);
 }
 
-let ar = null;
-let markerResult = null;
+var ar = null;
+var markerResult = null;
 
-let markers = {
+var markers = {
     "pinball": {
         width: 1637,
         height: 2048,
@@ -66,18 +66,18 @@ let markers = {
 };
 
 function start(container, marker, video, input_width, input_height, canvas_draw, render_update) {
-    let vw, vh;
-    let sw, sh;
-    let pscale, sscale;
-    let w, h;
-    let pw, ph;
-    let ox, oy;
+    var vw, vh;
+    var sw, sh;
+    var pscale, sscale;
+    var w, h;
+    var pw, ph;
+    var ox, oy;
 
-    let canvas_process = document.createElement('canvas');
-    let context_draw = canvas_draw.getContext('2d');
-    let context_process = canvas_process.getContext('2d');
+    var canvas_process = document.createElement('canvas');
+    var context_draw = canvas_draw.getContext('2d');
+    var context_process = canvas_process.getContext('2d');
 
-    let load = () => {
+    var load = function() {
         vw = input_width;
         vh = input_height;
 
@@ -105,10 +105,10 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
         canvas_process.width = pw;
         canvas_process.height = ph;
 
-        let param = new ARCameraParam('../Data/camera_para-iPhone 5 rear 640x480 1.0m.dat');
+        var param = new ARCameraParam('../Data/camera_para-iPhone 5 rear 640x480 1.0m.dat');
         param.onload = function () {
             ar = new ARController(pw, ph, param);
-            let cameraMatrix = ar.getCameraMatrix();
+            var cameraMatrix = ar.getCameraMatrix();
 
             ar.addEventListener('getNFTMarker', function (ev) {
                 markerResult = {type: "found", matrixGL_RH: JSON.stringify(ev.data.matrixGL_RH), proj: JSON.stringify(cameraMatrix)};
@@ -123,15 +123,15 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
         };
     };
 
-    let lasttime = Date.now();
-    let time = 0;
+    var lasttime = Date.now();
+    var time = 0;
 
-    let x = 0;
-    let draw = () => {
+    var x = 0;
+    var draw = function() {
         context_draw.clearRect(0, 0, vw, vh);
         render_update();
-        let now = Date.now();
-        let dt = now - lasttime;
+        var now = Date.now();
+        var dt = now - lasttime;
         time += dt;
         lasttime = now;
 
@@ -142,10 +142,10 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
 
 
         if (!markerResult) return;
-        let proj = JSON.parse(markerResult.proj);
-        let world = JSON.parse(markerResult.matrixGL_RH);
+        var proj = JSON.parse(markerResult.proj);
+        var world = JSON.parse(markerResult.matrixGL_RH);
 
-        let mat = multiplyMatrices(proj, world);
+        var mat = multiplyMatrices(proj, world);
 
         function glpointToCanvas(xyz) {
             return {
@@ -154,22 +154,22 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
             }
         }
         function drawpoint(x, y, z) {
-            let r = transformPoint(mat, {x: x, y: y, z: z});
-            let c = glpointToCanvas(r);
+            var r = transformPoint(mat, {x: x, y: y, z: z});
+            var c = glpointToCanvas(r);
             return c;
         }
 
-        let width = marker.width;
-        let height = marker.height;
-        let dpi = marker.dpi;
+        var width = marker.width;
+        var height = marker.height;
+        var dpi = marker.dpi;
 
-        let w = width / dpi * 2.54 * 10;
-        let h = height / dpi * 2.54 * 10;
+        var w = width / dpi * 2.54 * 10;
+        var h = height / dpi * 2.54 * 10;
 
-        let p1 = drawpoint(0, 0, 0);
-        let p2 = drawpoint(w, 0, 0);
-        let p3 = drawpoint(w, h, 0);
-        let p4 = drawpoint(0, h, 0);
+        var p1 = drawpoint(0, 0, 0);
+        var p2 = drawpoint(w, 0, 0);
+        var p3 = drawpoint(w, h, 0);
+        var p4 = drawpoint(0, h, 0);
         context_draw.beginPath();
         context_draw.moveTo(p1.x, p1.y);
         context_draw.lineTo(p2.x, p2.y);
@@ -186,11 +186,11 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
         context_process.drawImage(video, 0, 0, vw, vh, ox, oy, w, h);
         markerResult = null;
         if (ar) {
-            let imageData = context_process.getImageData(0, 0, pw, ph);
+            var imageData = context_process.getImageData(0, 0, pw, ph);
             ar.process(imageData);
         }
     }
-    let tick = () => {
+    var tick = function() {
         process();
         draw();
         requestAnimationFrame(tick);

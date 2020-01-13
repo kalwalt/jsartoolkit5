@@ -1,8 +1,3 @@
 doc/reference
 node_modules
 build/*.bc
-emscripten/libjpeg/*.h
-emscripten/libjpeg/*.c
-emscripten/libjpeg/*.txt
-emscripten/libjpeg/README
-emscripten/libjpeg/*.log

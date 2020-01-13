@@ -21,26 +21,26 @@
 <script src="main_worker.js"></script>
 
 <script>
-    let statsMain = new Stats();
+    var statsMain = new Stats();
     statsMain.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
     statsMain.domElement.style.position = 'relative';
     statsMain.domElement.style.left = '0px';
     statsMain.domElement.style.top = '0px';
     document.getElementById("stats1").appendChild(statsMain.dom);
 
-    let statsWorker = new Stats();
+    var statsWorker = new Stats();
     statsWorker.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
     statsWorker.domElement.style.position = 'relative';
     statsWorker.domElement.style.left = '0px';
     statsWorker.domElement.style.top = '0px';
     document.getElementById("stats2").appendChild(statsWorker.dom);
 
-    let container = document.getElementById('container');
-    let video = document.getElementById('video');
-    let canvas_draw = document.getElementById('canvas_draw');
+    var container = document.getElementById('container');
+    var video = document.getElementById('video');
+    var canvas_draw = document.getElementById('canvas_draw');
 
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        let hint = {};
+        var hint = {};
         if (isMobile()) {
             hint = {
                 facingMode: {"ideal": "environment"},
@@ -55,8 +55,8 @@
         navigator.mediaDevices.getUserMedia({video: hint}).then(function (stream) {
             video.srcObject = stream;
             video.play();
-            video.addEventListener("loadedmetadata", () => {
-                start(container, markers["pinball"], video, video.videoWidth, video.videoHeight, canvas_draw, () => statsMain.update(), () => statsWorker.update());
+            video.addEventListener("loadedmetadata", function() {
+                start(container, markers["pinball"], video, video.videoWidth, video.videoHeight, canvas_draw, function() {statsMain.update()}, function() {statsWorker.update()});
             });
         });
     }

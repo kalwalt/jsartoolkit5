@@ -9,16 +9,16 @@ window.addEventListener = function (name, callback) {
 };
 window.removeEventListener = function (name, callback) {
     if (window.listeners[name]) {
-        let index = window.listeners[name].indexOf(callback);
+        var index = window.listeners[name].indexOf(callback);
         if (index > -1) {
             window.listeners[name].splice(index, 1);
         }
     }
 };
 window.dispatchEvent = function (event) {
-    let listeners = window.listeners[event.type];
+    var listeners = window.listeners[event.type];
     if (listeners) {
-        for (let i = 0; i < listeners.length; i++) {
+        for (var i = 0; i < listeners.length; i++) {
             listeners[i].call(window, event);
         }
     }
@@ -40,10 +40,10 @@ self.onmessage = function(e) {
     }
 };
 
-let next = null;
+var next = null;
 
-let ar = null;
-let markerResult = null;
+var ar = null;
+var markerResult = null;
 
 function load(msg) {
     var param = new ARCameraParam(msg.camera_para);
@@ -82,7 +82,7 @@ function process() {
     next = null;
 }
 
-window.addEventListener('artoolkit-loaded', () => {
+window.addEventListener('artoolkit-loaded', function() {
     console.log('artoolkit-loaded');
     Object.assign(self, window);
     postMessage({type: "wasm"});

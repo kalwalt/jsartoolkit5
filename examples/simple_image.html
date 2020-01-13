@@ -7,11 +7,8 @@
 <img id="v4" src="Data/kuva.jpg"></img>
 <img id="v5" src="Data/armchair.jpg"></img>
 
-<script async src="../build/artoolkit.debug.js"></script>
-<script src="../js/artoolkit.api.js"></script>
+<script src="../build/artoolkit.min.js"></script>
 <script>
-
-var interval = setTimeout(function() {
 
 var cameraParam = new ARCameraParam();
 
@@ -70,8 +67,6 @@ cameraParam.onload = function() {
 
 };
 cameraParam.load('Data/camera_para.dat');
-
-}, 200);
 
 </script>
 
