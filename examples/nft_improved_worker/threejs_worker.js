@@ -2,11 +2,29 @@ function isMobile() {
     return /Android|mobile|iPad|iPhone/i.test(navigator.userAgent);
 }
 
+var interpolationFactor = 24;
+
+var trackedMatrix = {
+  // for interpolation
+  delta: [
+      0,0,0,0,
+      0,0,0,0,
+      0,0,0,0,
+      0,0,0,0
+  ],
+  interpolated: [
+      0,0,0,0,
+      0,0,0,0,
+      0,0,0,0,
+      0,0,0,0
+  ]
+}
+
 var markers = {
     "pinball": {
         width: 1637,
         height: 2048,
-        dpi: 215,
+        dpi: 250,
         url: "./examples/DataNFT/pinball",
     },
 };
@@ -36,7 +54,6 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     var canvas_process = document.createElement('canvas');
     var context_process = canvas_process.getContext('2d');
 
-    // var context_draw = canvas_draw.getContext('2d');
     var renderer = new THREE.WebGLRenderer({ canvas: canvas_draw, alpha: true, antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
 
@@ -44,8 +61,6 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
 
     var camera = new THREE.Camera();
     camera.matrixAutoUpdate = false;
-    // var camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
-    // camera.position.z = 400;
 
     scene.add(camera);
 
@@ -57,7 +72,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     var root = new THREE.Object3D();
     scene.add(root);
 
-    sphere.material.shading = THREE.FlatShading;
+    sphere.material.flatShading;
     sphere.position.z = 0;
     sphere.position.x = 100;
     sphere.position.y = 100;
@@ -116,12 +131,14 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
                     proj[9] *= ratioH;
                     proj[13] *= ratioH;
                     setMatrix(camera.projectionMatrix, proj);
-
-                    // removing loader page if present
-                    if (greyCover && greyCover.parentElement) {
-                        greyCover.parentElement.removeChild(greyCover);
-                    }
                     break;
+                }
+                case "endLoading": {
+                  if (msg.end == true)
+                    // removing loader page if present
+                    document.body.classList.remove("loading");
+                    document.getElementById("loading").remove();
+                  break;
                 }
                 case "found": {
                     found(msg);
@@ -137,9 +154,14 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
         };
     };
 
-    var lastmsg = null;
+    var world;
+
     var found = function(msg) {
-        lastmsg = msg;
+      if (!msg) {
+        world = null;
+      } else {
+        world = JSON.parse(msg.matrixGL_RH);
+      }
     };
 
     var lasttime = Date.now();
@@ -152,21 +174,20 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
         time += dt;
         lasttime = now;
 
-        if (!lastmsg) {
+        if (!world) {
             sphere.visible = false;
         } else {
-            var proj = JSON.parse(lastmsg.proj);
-            var world = JSON.parse(lastmsg.matrixGL_RH);
+          sphere.visible = true;
+                // interpolate matrix
+                for (var i = 0; i < 16; i++) {
+                  trackedMatrix.delta[i] = world[i] - trackedMatrix.interpolated[i];
+                  trackedMatrix.interpolated[i] =
+                    trackedMatrix.interpolated[i] +
+                    trackedMatrix.delta[i] / interpolationFactor;
+                }
 
-            var width = marker.width;
-            var height = marker.height;
-            var dpi = marker.dpi;
-
-            var w = width / dpi * 2.54 * 10;
-            var h = height / dpi * 2.54 * 10;
-
-            sphere.visible = true;
-            setMatrix(root.matrix, world);
+                // set matrix of 'root' by detected 'world' matrix
+                setMatrix(root.matrix, trackedMatrix.interpolated);
         }
         renderer.render(scene, camera);
     };

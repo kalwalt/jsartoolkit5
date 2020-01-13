@@ -24,7 +24,7 @@ var markers = {
     "pinball": {
         width: 1637,
         height: 2048,
-        dpi: 600,
+        dpi: 250,
         url: "../DataNFT/pinball",
     },
 };
@@ -41,7 +41,7 @@ var setMatrix = function (matrix, value) {
     }
 };
 
-var worker;
+//var worker;
 function start(container, marker, video, input_width, input_height, canvas_draw, render_update, track_update) {
     worker = new Worker('wasm_worker/artoolkit.wasm_worker.js');
     worker.onmessage = function(ev) {
@@ -61,7 +61,6 @@ function start2(container, marker, video, input_width, input_height, canvas_draw
     var canvas_process = document.createElement('canvas');
     var context_process = canvas_process.getContext('2d');
 
-    // var context_draw = canvas_draw.getContext('2d');
     var renderer = new THREE.WebGLRenderer({canvas: canvas_draw, alpha: true, antialias: true});
     renderer.setPixelRatio(window.devicePixelRatio);
 
@@ -69,8 +68,6 @@ function start2(container, marker, video, input_width, input_height, canvas_draw
 
     var camera = new THREE.Camera();
     camera.matrixAutoUpdate = false;
-    // var camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
-    // camera.position.z = 400;
 
     scene.add(camera);
 
@@ -82,11 +79,11 @@ function start2(container, marker, video, input_width, input_height, canvas_draw
     var root = new THREE.Object3D();
     scene.add(root);
 
-    sphere.material.shading = THREE.FlatShading;
+    sphere.material.flatShading;
     sphere.position.z = 0;
-    sphere.position.x = 40;
-    sphere.position.y = 40;
-    sphere.scale.set(80, 80, 80);
+    sphere.position.x = 100;
+    sphere.position.y = 100;
+    sphere.scale.set(200, 200, 200);
 
     root.matrixAutoUpdate = false;
     root.add(sphere);
@@ -146,7 +143,7 @@ function start2(container, marker, video, input_width, input_height, canvas_draw
                   if (msg.end == true)
                     // removing loader page if present
                     document.body.classList.remove("loading");
-                  document.getElementById("loading").remove();
+                    document.getElementById("loading").remove();
                   break;
                 }
 
