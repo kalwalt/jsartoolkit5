@@ -4,9 +4,11 @@
     var scope;
     if (typeof window !== 'undefined') {
         scope = window;
+    } else if (typeof window == 'undefined') {
+        scope = global;
     } else {
-        scope = self;
-    };
+	scope = global;
+	}
     if (scope.artoolkit_wasm_url) {
         var downloadWasm = function(url) {
             return new Promise(function (resolve, reject) {
@@ -830,9 +832,9 @@
     The returned object is the global artoolkit.NFTMarkerInfo object and will be overwritten
     by subsequent calls.
 
-		Returns undefined if no marker was found.
+  	Returns undefined if no marker was found.
 
-		A markerIndex of -1 is used to access the global custom marker.
+  	A markerIndex of -1 is used to access the global custom marker.
 
     @param {number} markerIndex The index of the NFT marker to query.
     @returns {Object} The NFTmarkerInfo struct.
@@ -2053,5 +2055,5 @@
             }
         };
     }
-
+module.exports = { ARController, ARCameraParam };
 })();
