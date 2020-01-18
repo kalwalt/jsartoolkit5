@@ -2055,5 +2055,7 @@
             }
         };
     }
-module.exports = { ARController, ARCameraParam };
+if (typeof window == 'undefined' || typeof scope == 'global') {
+module.exports = { artoolkit, ARController, ARCameraParam };
+}
 })();
