@@ -1,6 +1,7 @@
 {
   "name": "jsartoolkit",
   "version": "0.0.0",
+  "type": "module",
   "main": "js/index",
   "typings": "js/index",
   "description": "Emscripten port of ARToolKit to JavaScript",

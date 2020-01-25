@@ -164,6 +164,8 @@ var PRE_FLAGS = ' --pre-js ' + path.resolve(__dirname, '../js/artoolkit.api.js')
 
 FLAGS += ' --bind ';
 
+var MODULARIZE_FLAGS = ' -s EXPORT_ES6=1 -s MODULARIZE=1 '
+
 /* DEBUG FLAGS */
 var DEBUG_FLAGS = ' -g ';
 // DEBUG_FLAGS += ' -s ASSERTIONS=2 '
@@ -225,7 +227,7 @@ var compile_combine = format(EMCC + ' ' + INCLUDES + ' '
 
 var compile_combine_min = format(EMCC + ' ' + INCLUDES + ' '
     + ALL_BC + MAIN_SOURCES
-    + FLAGS + ' -s WASM=0' + ' ' + DEFINES + PRE_FLAGS + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
+    + FLAGS + ' -s WASM=0' + ' ' + DEFINES + PRE_FLAGS + MODULARIZE_FLAGS + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
     OUTPUT_PATH, OUTPUT_PATH, BUILD_MIN_FILE);
 
 var compile_wasm = format(EMCC + ' ' + INCLUDES + ' '
