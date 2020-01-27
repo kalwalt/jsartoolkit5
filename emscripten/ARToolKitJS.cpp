@@ -102,6 +102,8 @@ extern "C" {
 	int getNFTMarkerInfo(int id, int markerIndex) {
 		if (arControllers.find(id) == arControllers.end()) { return ARCONTROLLER_NOT_FOUND; }
 		arController *arc = &(arControllers[id]);
+		arc->filterCutoffFrequency = 15.0;
+		arc->filterSampleRate = 30.0;
 
 		if (arc->surfaceSetCount <= markerIndex) {
 			return MARKER_INDEX_OUT_OF_BOUNDS;
@@ -274,6 +276,7 @@ extern "C" {
 		if (arControllers.find(id) == arControllers.end()) { return -1; }
 		arController *arc = &(arControllers[id]);
 		//arc->pixFormat = arVideoGetPixelFormat();
+		ARLOGi("filterCutoffFrequency value: %d\n", AR_FILTER_TRANS_MAT_CUTOFF_FREQ_DEFAULT);
 
 		if ((arc->ar2Handle = ar2CreateHandleMod(arc->paramLT, arc->pixFormat)) == NULL) {
 			ARLOGe("Error: ar2CreateHandle.\n");
