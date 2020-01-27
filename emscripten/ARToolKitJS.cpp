@@ -53,6 +53,9 @@ struct arController {
 
 	KpmHandle* kpmHandle;
 	AR2HandleT* ar2Handle;
+	ARFilterTransMatInfo *ftmi;
+	ARdouble   filterCutoffFrequency = AR_FILTER_TRANS_MAT_CUTOFF_FREQ_DEFAULT;
+	ARdouble   filterSampleRate = AR_FILTER_TRANS_MAT_SAMPLE_RATE_DEFAULT;
 
 	int detectedPage = -2;  // -2 Tracking not inited, -1 tracking inited OK, >= 0 tracking online on page.
 
@@ -108,10 +111,12 @@ extern "C" {
 		int kpmResultNum = -1;
 
 		float trans[3][4];
+		ARdouble transF[3][4];
 		float err = -1;
 		if (arc->detectedPage == -2) {
 			kpmMatching( arc->kpmHandle, arc->videoLuma );
 			kpmGetResult( arc->kpmHandle, &kpmResult, &kpmResultNum );
+			arc->ftmi = arFilterTransMatInit(arc->filterSampleRate, arc->filterCutoffFrequency);
 			int i, j, k;
 			int flag = -1;
 			for( i = 0; i < kpmResultNum; i++ ) {
@@ -139,6 +144,14 @@ extern "C" {
 
 		if (arc->detectedPage >= 0) {
 			int trackResult = ar2TrackingMod(arc->ar2Handle, arc->surfaceSet[arc->detectedPage], arc->videoFrame, trans, &err);
+			for (int j = 0; j < 3; j++) {
+				for (int k = 0; k < 4; k++) {
+					transF[j][k] = trans[j][k];
+				}
+			}
+			if (arFilterTransMat(arc->ftmi, transF, 1) < 0) {
+					ARLOGe("arFilterTransMat error with marker %d.\n", markerIndex);
+			}
 			if( trackResult < 0 ) {
 				ARLOGi("Tracking lost. %d\n", trackResult);
 				arc->detectedPage = -2;
@@ -179,20 +192,20 @@ extern "C" {
 				markerIndex,
 				err,
 
-				trans[0][0],
-				trans[0][1],
-				trans[0][2],
-				trans[0][3],
+				transF[0][0],
+				transF[0][1],
+				transF[0][2],
+				transF[0][3],
 
-				trans[1][0],
-				trans[1][1],
-				trans[1][2],
-				trans[1][3],
+				transF[1][0],
+				transF[1][1],
+				transF[1][2],
+				transF[1][3],
 
-				trans[2][0],
-				trans[2][1],
-				trans[2][2],
-				trans[2][3]
+				transF[2][0],
+				transF[2][1],
+				transF[2][2],
+				transF[2][3]
 			);
         } else {
 			EM_ASM_({
@@ -347,6 +360,10 @@ extern "C" {
 			arPattDetach(arc->arhandle);
 			arDeleteHandle(arc->arhandle);
 			arc->arhandle = NULL;
+			if (arc->ftmi) {
+					arFilterTransMatFinal(arc->ftmi);
+					arc->ftmi = NULL;
+			}
 		}
 		if (arc->ar3DHandle != NULL) {
 			ar3DDeleteHandle(&(arc->ar3DHandle));
