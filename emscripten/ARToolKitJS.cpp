@@ -54,8 +54,8 @@ struct arController {
 	KpmHandle* kpmHandle;
 	AR2HandleT* ar2Handle;
 	ARFilterTransMatInfo *ftmi;
-	ARdouble   filterCutoffFrequency = AR_FILTER_TRANS_MAT_CUTOFF_FREQ_DEFAULT;
-	ARdouble   filterSampleRate = AR_FILTER_TRANS_MAT_SAMPLE_RATE_DEFAULT;
+	ARdouble   filterCutoffFrequency = 25.0;
+	ARdouble   filterSampleRate = 50.0;
 
 	int detectedPage = -2;  // -2 Tracking not inited, -1 tracking inited OK, >= 0 tracking online on page.
 
@@ -102,8 +102,6 @@ extern "C" {
 	int getNFTMarkerInfo(int id, int markerIndex) {
 		if (arControllers.find(id) == arControllers.end()) { return ARCONTROLLER_NOT_FOUND; }
 		arController *arc = &(arControllers[id]);
-		arc->filterCutoffFrequency = 15.0;
-		arc->filterSampleRate = 30.0;
 
 		if (arc->surfaceSetCount <= markerIndex) {
 			return MARKER_INDEX_OUT_OF_BOUNDS;
@@ -276,7 +274,6 @@ extern "C" {
 		if (arControllers.find(id) == arControllers.end()) { return -1; }
 		arController *arc = &(arControllers[id]);
 		//arc->pixFormat = arVideoGetPixelFormat();
-		ARLOGi("filterCutoffFrequency value: %d\n", AR_FILTER_TRANS_MAT_CUTOFF_FREQ_DEFAULT);
 
 		if ((arc->ar2Handle = ar2CreateHandleMod(arc->paramLT, arc->pixFormat)) == NULL) {
 			ARLOGe("Error: ar2CreateHandle.\n");
