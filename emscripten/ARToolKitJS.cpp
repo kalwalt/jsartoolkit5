@@ -149,7 +149,15 @@ extern "C" {
 					transF[j][k] = trans[j][k];
 				}
 			}
-			if (arFilterTransMat(arc->ftmi, transF, 1) < 0) {
+
+			bool reset;
+			if (trackResult < 0) {
+				reset = 1;
+			} else {
+				reset = 0;
+			}
+
+			if (arFilterTransMat(arc->ftmi, transF, reset) < 0) {
 					ARLOGe("arFilterTransMat error with marker %d.\n", markerIndex);
 			}
 			if( trackResult < 0 ) {
