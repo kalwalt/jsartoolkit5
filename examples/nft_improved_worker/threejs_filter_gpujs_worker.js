@@ -4,23 +4,12 @@ function isMobile() {
 
 const gpu = new GPU({ mode: 'gpu' });
 
-var interpolationFactor = 24;
-
-var trackedMatrix = {
-  // for interpolation
-  delta: [
-      0,0,0,0,
-      0,0,0,0,
-      0,0,0,0,
-      0,0,0,0
-  ],
-  interpolated: [
-      0,0,0,0,
-      0,0,0,0,
-      0,0,0,0,
-      0,0,0,0
-  ]
-}
+var interpolated = [
+    0,0,0,0,
+    0,0,0,0,
+    0,0,0,0,
+    0,0,0,0
+]
 
 var markers = {
     "pinball": {
@@ -169,15 +158,14 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     var lasttime = Date.now();
     var time = 0;
 
-    const kernelFunction = function(interpolated, delta, world){
+    const kernelFunction = function(interpolated, world){
           // interpolate matrix
-          delta[this.thread.x] = world[this.thread.x] - interpolated[this.thread.x];
-          interpolated[this.thread.x] = interpolated[this.thread.x] + delta[this.thread.x] / 24.0;
-        return interpolated;
+          const result  = interpolated[this.thread.x] + (world[this.thread.x] - interpolated[this.thread.x]) / 24.0;
+        return result;
     }
 
     const kernel = gpu.createKernel(kernelFunction, {
-      output: [16],
+      output: [16,16],
       precision: 'single',
     });
 
@@ -192,12 +180,9 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
           sphere.visible = false;
         } else {
           sphere.visible = true;
-          console.log(trackedMatrix.delta)
-          const result = kernel(trackedMatrix.interpolated, trackedMatrix.delta, world);
-          //console.log(result[0]); //
+          const result = kernel(interpolated, world);
                 // set matrix of 'root' by detected 'world' matrix
                 setMatrix(root.matrix, result);
-                //setMatrix(root.matrix, trackedMatrix.interpolated);
         }
         renderer.render(scene, camera);
     };
