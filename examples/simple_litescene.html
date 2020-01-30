@@ -13,10 +13,12 @@
     <script src="./js/third_party/litescene.js/litescene.js"></script>
     <script async src="../build/artoolkit.min.js"></script>
     <script type="text/javascript">
+    var i = 3;
 
       var APP = {
 		cam_dist: 10,
-    ar: {},
+
+    ar: {transform: []},
 
 		init: function()
 		{
@@ -53,11 +55,15 @@
 			LS.GlobalScene.info.ambient_color = [0.2,0.2,0.2];
 
 			//global camera
-			var camera = LS.GlobalScene.getCamera();
+      var camera = new LS.Camera();
+      camera.clear_color = true;
 			camera.center = [0,35,0];
 			camera.eye = [150,40,150];
 			camera.far = 1000;
 			camera.near = 1;
+      var nodeCam = new LS.SceneNode("cameraNode");
+      nodeCam.addComponent(camera);
+      LS.GlobalScene.root.addChild( nodeCam );;
 
       // add a simple cube and attach it to a node
       var node = new LS.SceneNode(); //create a node
@@ -65,17 +71,14 @@
       var mesh = GL.Mesh.cube({size: 10}); // add a simple cube with size of 10
       var comp = new LS.Components.MeshRenderer({mesh: mesh}); //create a mesh renderer
       node.addComponent( comp ); //add to the node
-      //console.log(node.transform);
 
       var arController;
+      var transform;
       var interval = setTimeout(function() {
 
       arController = new ARController(640, 480, 'Data/camera_para.dat');
-      APP.ar = arController;
-      //console.log(APP.ar)
 
       var camera_mat = arController.getCameraMatrix();
-      camera.setCustomProjectionMatrix = camera_mat;
 
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         var hint = {
@@ -110,28 +113,50 @@
                   } );
 
                   arController.loadMarker('Data/patt.hiro', function(markerId){
-                    console.log(markerId >= 0, "Marker loaded");
+                    console.log("loadMarker -> ", markerId);
                     arController.trackPatternMarkerId(markerId);
-                    //arController.process(video);
-                  });
-                  arController.process(video);
-                	var markerNum = arController.getMarkerNum();
 
-                	if (markerNum > 0) {
-                		if (node.transform.visible) {
-                			arController.getTransMatSquareCont(0, 1, node.transform.matrix, node.transform.matrix);
-                		} else {
-                			arController.getTransMatSquare(0 /* Marker index */, 1 /* Marker width */, node.transform.matrix);
-                		}
-                		root.visible = true;
+                  });
+
+                  var interval = setInterval(function() {
+                    arController.process(video);
+                  }, 13);
+
+                  var markerNum = arController.getMarkerNum();
+                  arController.addEventListener('getMarker', function(ev) {
+                    transform =  ev.data.matrix;
+                    console.log("Marker data", transform);
+                  });
+
+                  let cameraGlobalMatrix = nodeCam.transform.getGlobalMatrix();
+
+                  let markerRootMatrix = mat4.create();
+                  console.log(transform);
+                  mat4.multiply(markerRootMatrix, cameraGlobalMatrix, transform);
+                  let outQuat = quat.create();
+                  quat.fromMat4(outQuat,markerRootMatrix);
+                  outQuat[0]*=-1;
+                  var markerRoot = LS.GlobalScene.root
+                  markerRoot.transform.setPosition(vec3.fromValues(markerRootMatrix[12],markerRootMatrix[13]*-1,markerRootMatrix[14]*-1));
+                  markerRoot.transform.setRotation(outQuat);
+            			LS.GlobalScene.update(dt);
+
+                /*	if (markerNum > 0) {
+                    if (node.transform.visible) {
+                      arController.getTransMatSquareCont(0, 1, node.transform.matrix, node.transform.matrix);
+                    } else {
+                      arController.getTransMatSquare(0 /* Marker index *///, 1 /* Marker width */, node.transform.matrix);
+                  /*	}
+                    root.visible = true;
                     arController.arglCameraViewRHf(arController.transMatToGLMat(node.transform.matrix), node.transform.matrix.elements);
 
-                	} else {
-                		node.transform.visible = false;
-                	}
+                  } else {
+                    node.transform.visible = false;
+                  }*/
               } );
           }
       }, 200);
+
 			//example of forward render function to inject draw calls into the scene
 			LS.Renderer.onRenderScene = function(camera)
 			{
@@ -147,15 +172,12 @@
 			camera.eye = [5 * (APP.cam_dist),40, -20 * (APP.cam_dist)];
 			//render the scene (it uses LS.GlobalScene as default)
 			LS.Renderer.render();
-      //this not works, i get APP.ar.addEventListener is not a function
-      //APP.ar.addEventListener('getMarker', function(ev) {
-      //  console.log("Marker data", ev.data.marker);
-      //});
 		},
 
 		onupdate: function(dt)
 		{
 			var now = new Date().getTime();
+
 			LS.GlobalScene.update(dt);
 		},
 
@@ -175,6 +197,8 @@
 
         <canvas id="canvas"></canvas>
     </div>
-      <script>APP.init();</script>
+      <script>
+            APP.init();
+    </script>
   </body>
 </html>
