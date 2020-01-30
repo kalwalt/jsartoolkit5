@@ -39,7 +39,7 @@
       gl.canvas.width = width;
       gl.canvas.height = height;
 			this.glcanvas = gl.canvas;
-			document.body.appendChild(gl.canvas);
+      document.getElementById('app').appendChild(gl.canvas);
 			this.gl = gl;
 
       //capture interaction events
@@ -57,7 +57,8 @@
 			//global camera
       var camera = new LS.Camera();
       camera.clear_color = true;
-			camera.center = [0,35,0];
+      camera.background_color = [0, 0, 0, 0];
+			camera.center = [0,0,0];
 			camera.eye = [150,40,150];
 			camera.far = 1000;
 			camera.near = 1;
@@ -69,8 +70,9 @@
       var node = new LS.SceneNode(); //create a node
       LS.GlobalScene.root.addChild( node ); //add to the scene
       var mesh = GL.Mesh.cube({size: 10}); // add a simple cube with size of 10
-      var comp = new LS.Components.MeshRenderer({mesh: mesh}); //create a mesh renderer
+      var comp = new LS.Components.MeshRenderer({mesh: mesh }); //create a mesh renderer
       node.addComponent( comp ); //add to the node
+      node.material =  new LS.StandardMaterial({ color: [0.5,0.5,0.5] });
 
       var arController;
       var transform;
@@ -128,31 +130,18 @@
                     console.log("Marker data", transform);
                   });
 
-                  let cameraGlobalMatrix = nodeCam.transform.getGlobalMatrix();
-
-                  let markerRootMatrix = mat4.create();
-                  console.log(transform);
-                  mat4.multiply(markerRootMatrix, cameraGlobalMatrix, transform);
-                  let outQuat = quat.create();
-                  quat.fromMat4(outQuat,markerRootMatrix);
-                  outQuat[0]*=-1;
-                  var markerRoot = LS.GlobalScene.root
-                  markerRoot.transform.setPosition(vec3.fromValues(markerRootMatrix[12],markerRootMatrix[13]*-1,markerRootMatrix[14]*-1));
-                  markerRoot.transform.setRotation(outQuat);
-            			LS.GlobalScene.update(dt);
-
-                /*	if (markerNum > 0) {
-                    if (node.transform.visible) {
-                      arController.getTransMatSquareCont(0, 1, node.transform.matrix, node.transform.matrix);
-                    } else {
-                      arController.getTransMatSquare(0 /* Marker index *///, 1 /* Marker width */, node.transform.matrix);
-                  /*	}
-                    root.visible = true;
-                    arController.arglCameraViewRHf(arController.transMatToGLMat(node.transform.matrix), node.transform.matrix.elements);
-
-                  } else {
-                    node.transform.visible = false;
-                  }*/
+                  if(transform){
+                    let cameraGlobalMatrix = nodeCam.transform.getGlobalMatrix();
+                    let markerRootMatrix = mat4.create();;
+                    mat4.multiply(markerRootMatrix, cameraGlobalMatrix, transform);
+                    let outQuat = quat.create();
+                    quat.fromMat4(outQuat,markerRootMatrix);
+                    outQuat[0]*=-1;
+                    var markerRoot = LS.GlobalScene.root
+                    markerRoot.transform.setPosition(vec3.fromValues(markerRootMatrix[12],markerRootMatrix[13]*-1,markerRootMatrix[14]*-1));
+                    markerRoot.transform.setRotation(outQuat);
+              			LS.GlobalScene.update(dt);
+                  }
               } );
           }
       }, 200);
@@ -168,8 +157,8 @@
     ondraw: function()
 		{
 			//setup the camera
-			var camera = LS.GlobalScene.getCamera();
-			camera.eye = [5 * (APP.cam_dist),40, -20 * (APP.cam_dist)];
+			//var camera = LS.GlobalScene.getCamera();
+			//camera.eye = [5 * (APP.cam_dist),40, -20 * (APP.cam_dist)];
 			//render the scene (it uses LS.GlobalScene as default)
 			LS.Renderer.render();
 		},
@@ -195,7 +184,7 @@
             id="video">
         </video>
 
-        <canvas id="canvas"></canvas>
+        <!--<canvas id="canvas"></canvas>-->
     </div>
       <script>
             APP.init();
