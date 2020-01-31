@@ -99,6 +99,14 @@ extern "C" {
 		NFT API bindings
 	*/
 
+	void matrixLerp(ARdouble src[3][4], ARdouble dst[3][4], float interpolationFactor) {
+		for (int i=0; i<3; i++) {
+			for (int j=0; j<4; j++) {
+				dst[i][j] = dst[i][j] + (src[i][j] - dst[i][j]) / interpolationFactor;
+			}
+		}
+	}
+
 	int getNFTMarkerInfo(int id, int markerIndex) {
 		if (arControllers.find(id) == arControllers.end()) { return ARCONTROLLER_NOT_FOUND; }
 		arController *arc = &(arControllers[id]);
@@ -112,6 +120,8 @@ extern "C" {
 
 		float trans[3][4];
 		ARdouble transF[3][4];
+		ARdouble transFLerp[3][4];
+		memset( transFLerp, 0, 3 * 4 * sizeof(ARdouble) );
 		float err = -1;
 		if (arc->detectedPage == -2) {
 			kpmMatching( arc->kpmHandle, arc->videoLuma );
@@ -160,6 +170,9 @@ extern "C" {
 			if (arFilterTransMat(arc->ftmi, transF, reset) < 0) {
 					ARLOGe("arFilterTransMat error with marker %d.\n", markerIndex);
 			}
+
+			matrixLerp(transF, transFLerp, 24.0);
+
 			if( trackResult < 0 ) {
 				ARLOGi("Tracking lost. %d\n", trackResult);
 				arc->detectedPage = -2;
@@ -200,20 +213,20 @@ extern "C" {
 				markerIndex,
 				err,
 
-				transF[0][0],
-				transF[0][1],
-				transF[0][2],
-				transF[0][3],
+				transFLerp[0][0],
+				transFLerp[0][1],
+				transFLerp[0][2],
+				transFLerp[0][3],
 
-				transF[1][0],
-				transF[1][1],
-				transF[1][2],
-				transF[1][3],
+				transFLerp[1][0],
+				transFLerp[1][1],
+				transFLerp[1][2],
+				transFLerp[1][3],
 
-				transF[2][0],
-				transF[2][1],
-				transF[2][2],
-				transF[2][3]
+				transFLerp[2][0],
+				transFLerp[2][1],
+				transFLerp[2][2],
+				transFLerp[2][3]
 			);
         } else {
 			EM_ASM_({
