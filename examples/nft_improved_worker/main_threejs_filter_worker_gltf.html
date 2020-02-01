@@ -60,7 +60,8 @@
 
     <script src="../js/third_party/three.js/stats.min.js"></script>
     <script src="../js/third_party/three.js/three.min.js"></script>
-    <script src="threejs_filter_worker.js"></script>
+    <script src="../js/third_party/three.js/GLTFLoader.js"></script>
+    <script src="threejs_filter_worker_gltf.js"></script>
 
     <script>
 
@@ -92,22 +93,14 @@
               video: true
           };
           if( window.innerWidth < 800 ) {
-              var width = ( window.innerWidth < window.innerHeight ) ? 240 : 360;
-              var height = ( window.innerWidth < window.innerHeight ) ? 360 : 240;
-
-              var aspectRatio = window.innerWidth / window.innerHeight;
-
-              console.log( width, height );
-
               hint = {
                   audio: false,
                   video: {
                       facingMode: 'environment',
-                      width: { min: width, max: width }
+                      width: { ideal: 1024, },
+                      height: { ideal: 540, }
                   },
               };
-
-              console.log( hint );
           }
 
           navigator.mediaDevices.getUserMedia( hint ).then( function( stream ) {
