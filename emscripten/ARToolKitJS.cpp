@@ -59,6 +59,9 @@ struct arController {
 	int surfaceSetCount = 0; // Running NFT marker id
 	AR2SurfaceSetT      *surfaceSet[PAGES_MAX];
 	std::unordered_map<int, AR2SurfaceSetT*> surfaceSets;
+	int width_NFT;
+	int height_NFT;
+	int dpi_NFT;
 
 	ARdouble nearPlane = 0.0001;
 	ARdouble farPlane = 1000.0;
@@ -315,14 +318,14 @@ extern "C" {
 		}
 
 		numIset = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->num;
-		width = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->scale[0]->xsize;
-		height = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->scale[0]->ysize;
-		dpi = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->scale[0]->dpi;
+		arc->width_NFT = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->scale[0]->xsize;
+		arc->height_NFT = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->scale[0]->ysize;
+		arc->dpi_NFT = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->scale[0]->dpi;
 
 		ARLOGi("NFT num. of ImageSet: %i\n", numIset);
-		ARLOGi("NFT marker width: %i\n", width);
-		ARLOGi("NFT marker width: %i\n", height);
-		ARLOGi("NFT marker dpi: %i\n", dpi);
+		ARLOGi("NFT marker width: %i\n", arc->width_NFT);
+		ARLOGi("NFT marker width: %i\n", arc->height_NFT);
+		ARLOGi("NFT marker dpi: %i\n", arc->dpi_NFT);
 
 		ARLOGi("  Done.\n");
 
