@@ -280,7 +280,7 @@ extern "C" {
 	}
 
 	int loadNFTMarker(arController *arc, int surfaceSetCount, const char* datasetPathname) {
-		int i, pageNo;
+		int i, pageNo, numIset, width, height, dpi;
 		KpmRefDataSet *refDataSet;
 
 		KpmHandle *kpmHandle = arc->kpmHandle;
@@ -313,6 +313,17 @@ extern "C" {
 		if ((arc->surfaceSet[surfaceSetCount] = ar2ReadSurfaceSet(datasetPathname, "fset", NULL)) == NULL ) {
 		    ARLOGe("Error reading data from %s.fset\n", datasetPathname);
 		}
+
+		numIset = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->num;
+		width = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->scale[0]->xsize;
+		height = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->scale[0]->ysize;
+		dpi = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->scale[0]->dpi;
+
+		ARLOGi("NFT num. of ImageSet: %i\n", numIset);
+		ARLOGi("NFT marker width: %i\n", width);
+		ARLOGi("NFT marker width: %i\n", height);
+		ARLOGi("NFT marker dpi: %i\n", dpi);
+
 		ARLOGi("  Done.\n");
 
 	if (surfaceSetCount == PAGES_MAX) exit(-1);
