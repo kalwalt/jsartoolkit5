@@ -159,6 +159,9 @@ extern "C" {
 						id: 0,
 						error: -1,
 						found: 0,
+						width: 0,
+						height: 0,
+						dpi: 0,
 						pose: [0,0,0,0, 0,0,0,0, 0,0,0,0]
 					});
 				}
@@ -166,6 +169,9 @@ extern "C" {
 				markerInfo["id"] = $a[i++];
 				markerInfo["error"] = $a[i++];
 				markerInfo["found"] = 1;
+				markerInfo["width"] = $a[i++];
+				markerInfo["height"] = $a[i++];
+				markerInfo["dpi"] = $a[i++];
 				markerInfo["pose"][0] = $a[i++];
 				markerInfo["pose"][1] = $a[i++];
 				markerInfo["pose"][2] = $a[i++];
@@ -181,6 +187,9 @@ extern "C" {
 			},
 				markerIndex,
 				err,
+				arc->width_NFT,
+				arc->height_NFT,
+				arc->dpi_NFT,
 
 				trans[0][0],
 				trans[0][1],
@@ -206,6 +215,9 @@ extern "C" {
 						id: 0,
 						error: -1,
 						found: 0,
+						width: 0,
+						height: 0,
+						dpi: 0,
 						pose: [0,0,0,0, 0,0,0,0, 0,0,0,0]
 					});
 				}
@@ -213,6 +225,9 @@ extern "C" {
 				markerInfo["id"] = $a[i++];
 				markerInfo["error"] = -1;
 				markerInfo["found"] = 0;
+				markerInfo["width"] = 0;
+				markerInfo["height"] = 0;
+				markerInfo["dpi"] = 0;
 				markerInfo["pose"][0] = 0;
 				markerInfo["pose"][1] = 0;
 				markerInfo["pose"][2] = 0;

@@ -161,6 +161,9 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
         world = null;
       } else {
         world = JSON.parse(msg.matrixGL_RH);
+        console.log("NFT width: ", msg.width);
+        console.log("NFT height: ",msg.height);
+        console.log("NFT dpi: ",msg.dpi);
       }
     };
 
