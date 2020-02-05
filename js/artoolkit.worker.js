@@ -28,14 +28,17 @@ function load(msg) {
         ar = new ARController(msg.pw, msg.ph, param);
         var cameraMatrix = ar.getCameraMatrix();
 
-        ar.addEventListener('getNFTMarker', function (ev) {
-            markerResult = {type: "found",
-                            matrixGL_RH: JSON.stringify(ev.data.matrixGL_RH),
-                            width: JSON.stringify(ev.data.marker.width),
-                            height: JSON.stringify(ev.data.marker.height),
-                            dpi: JSON.stringify(ev.data.marker.dpi),
-                            proj: JSON.stringify(cameraMatrix)};
+        ar.addEventListener("getNFTMarker", function(ev) {
+            markerResult = {
+              type: "found",
+              matrixGL_RH: JSON.stringify(ev.data.matrixGL_RH),
+              width: JSON.stringify(ev.data.marker.width),
+              height: JSON.stringify(ev.data.marker.height),
+              dpi: JSON.stringify(ev.data.marker.dpi),
+              proj: JSON.stringify(cameraMatrix)
+            };
         });
+
 
         ar.loadNFTMarker(msg.marker, function (markerId) {
             ar.trackNFTMarkerId(markerId, 2);
