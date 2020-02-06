@@ -73,9 +73,6 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     scene.add(root);
 
     sphere.material.flatShading;
-    sphere.position.z = 0;
-    sphere.position.x = 100;
-    sphere.position.y = 100;
     sphere.scale.set(200, 200, 200);
 
     root.matrixAutoUpdate = false;
@@ -181,6 +178,12 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
             sphere.visible = false;
         } else {
           sphere.visible = true;
+          var boundingBox = new THREE.Box3().setFromObject(sphere);
+          var size = boundingBox.getSize();
+          console.log(size);
+          sphere.position.x = size.x;
+          sphere.position.y = size.y;
+
                 // interpolate matrix
                 for (var i = 0; i < 16; i++) {
                   trackedMatrix.delta[i] = world[i] - trackedMatrix.interpolated[i];
