@@ -107,6 +107,14 @@ extern "C" {
 		}
 	}
 
+	void matrixLerp2(ARdouble src[3][4], ARdouble dst[3][4], float interpolationFactor) {
+		for (int i=0; i<3; i++) {
+			for (int j=0; j<4; j++) {
+				dst[i][j] = (1 - interpolationFactor) * src[i][j] + interpolationFactor * dst[i][j];
+			}
+		}
+	}
+
 	int getNFTMarkerInfo(int id, int markerIndex) {
 		if (arControllers.find(id) == arControllers.end()) { return ARCONTROLLER_NOT_FOUND; }
 		arController *arc = &(arControllers[id]);
@@ -171,7 +179,7 @@ extern "C" {
 					ARLOGe("arFilterTransMat error with marker %d.\n", markerIndex);
 			}
 
-			matrixLerp(transF, transFLerp, 24.0);
+			matrixLerp2(transF, transFLerp, 0.5);
 
 			if( trackResult < 0 ) {
 				ARLOGi("Tracking lost. %d\n", trackResult);
