@@ -89,11 +89,10 @@ function start( container, marker, video, input_width, input_height, canvas_draw
     /* Load Model */
     var threeGLTFLoader = new THREE.GLTFLoader();
 
+    var objPositions;
+
     threeGLTFLoader.load("../Data/models/Flamingo.glb", function (gltf) {
             model = gltf.scene.children[0];
-            model.position.z = 0;
-            model.position.x = 100;
-            model.position.y = 100;
 
             var animation = gltf.animations[0];
             var mixer = new THREE.AnimationMixer(model);
@@ -103,8 +102,16 @@ function start( container, marker, video, input_width, input_height, canvas_draw
 
             root.matrixAutoUpdate = false;
             root.add(model);
+
+            var dimensions = new THREE.Box3().setFromObject(model);
+            objPositions = {
+                width: dimensions.max.x - dimensions.min.x,
+                height: dimensions.max.y - dimensions.min.y,
+            };
+
         }
     );
+
 
     var load = function() {
         vw = input_width;
@@ -200,6 +207,18 @@ function start( container, marker, video, input_width, input_height, canvas_draw
             world = null;
         } else {
             world = JSON.parse(msg.matrixGL_RH);
+
+            // ~nicolocarpignoli this is absolutely based on empirics. Have to test with other 3D models and
+            // other different images, possibly with different aspect ratio
+            if (!window.firstPositioning) {
+                window.firstPositioning = true;
+                model.position.y = (msg.width / msg.dpi) * 1000 / objPositions.width;
+                model.position.x = (msg.height / msg.dpi) * 1000 / objPositions.height;
+            }
+
+            console.log("NFT width: ", msg.width);
+            console.log("NFT height: ", msg.height);
+            console.log("NFT dpi: ", msg.dpi);
         }
     };
 

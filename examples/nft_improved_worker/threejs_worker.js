@@ -5,19 +5,19 @@ function isMobile() {
 var interpolationFactor = 24;
 
 var trackedMatrix = {
-  // for interpolation
-  delta: [
-      0,0,0,0,
-      0,0,0,0,
-      0,0,0,0,
-      0,0,0,0
-  ],
-  interpolated: [
-      0,0,0,0,
-      0,0,0,0,
-      0,0,0,0,
-      0,0,0,0
-  ]
+    // for interpolation
+    delta: [
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0
+    ],
+    interpolated: [
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0
+    ]
 }
 
 var markers = {
@@ -78,7 +78,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     root.matrixAutoUpdate = false;
     root.add(sphere);
 
-    var load = function() {
+    var load = function () {
         vw = input_width;
         vh = input_height;
 
@@ -112,7 +112,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
 
         worker.postMessage({ type: "load", pw: pw, ph: ph, camera_para: camera_para, marker: '../' + marker.url });
 
-        worker.onmessage = function(ev) {
+        worker.onmessage = function (ev) {
             var msg = ev.data;
             switch (msg.type) {
                 case "loaded": {
@@ -131,11 +131,11 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
                     break;
                 }
                 case "endLoading": {
-                  if (msg.end == true)
-                    // removing loader page if present
-                    document.body.classList.remove("loading");
+                    if (msg.end == true)
+                        // removing loader page if present
+                        document.body.classList.remove("loading");
                     document.getElementById("loading").remove();
-                  break;
+                    break;
                 }
                 case "found": {
                     found(msg);
@@ -153,21 +153,21 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
 
     var world;
 
-    var found = function(msg) {
-      if (!msg) {
-        world = null;
-      } else {
-        world = JSON.parse(msg.matrixGL_RH);
-        console.log("NFT width: ", msg.width);
-        console.log("NFT height: ",msg.height);
-        console.log("NFT dpi: ",msg.dpi);
-      }
+    var found = function (msg) {
+        if (!msg) {
+            world = null;
+        } else {
+            world = JSON.parse(msg.matrixGL_RH);
+            console.log("NFT width: ", msg.width);
+            console.log("NFT height: ", msg.height);
+            console.log("NFT dpi: ", msg.dpi);
+        }
     };
 
     var lasttime = Date.now();
     var time = 0;
 
-    var draw = function() {
+    var draw = function () {
         render_update();
         var now = Date.now();
         var dt = now - lasttime;
@@ -177,23 +177,23 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
         if (!world) {
             sphere.visible = false;
         } else {
-          sphere.visible = true;
-          var boundingBox = new THREE.Box3().setFromObject(sphere);
-          var size = boundingBox.getSize();
-          console.log(size);
-          sphere.position.x = size.x;
-          sphere.position.y = size.y;
+            sphere.visible = true;
+            var boundingBox = new THREE.Box3().setFromObject(sphere);
+            var size = boundingBox.getSize();
+            console.log(size);
+            sphere.position.x = size.x;
+            sphere.position.y = size.y;
 
-                // interpolate matrix
-                for (var i = 0; i < 16; i++) {
-                  trackedMatrix.delta[i] = world[i] - trackedMatrix.interpolated[i];
-                  trackedMatrix.interpolated[i] =
+            // interpolate matrix
+            for (var i = 0; i < 16; i++) {
+                trackedMatrix.delta[i] = world[i] - trackedMatrix.interpolated[i];
+                trackedMatrix.interpolated[i] =
                     trackedMatrix.interpolated[i] +
                     trackedMatrix.delta[i] / interpolationFactor;
-                }
+            }
 
-                // set matrix of 'root' by detected 'world' matrix
-                setMatrix(root.matrix, trackedMatrix.interpolated);
+            // set matrix of 'root' by detected 'world' matrix
+            setMatrix(root.matrix, trackedMatrix.interpolated);
         }
         renderer.render(scene, camera);
     };
@@ -206,7 +206,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
         var imageData = context_process.getImageData(0, 0, pw, ph);
         worker.postMessage({ type: "process", imagedata: imageData }, [imageData.data.buffer]);
     }
-    var tick = function() {
+    var tick = function () {
         draw();
         requestAnimationFrame(tick);
     };
