@@ -98,7 +98,7 @@ function start( container, marker, video, input_width, input_height, canvas_draw
               height: dimensions.max.y - dimensions.min.y
             };
 
-
+            console.log('3D Model sizes: ', objPositions.width, objPositions.height);
         }
     );
 
