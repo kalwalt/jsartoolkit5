@@ -94,6 +94,7 @@ function start( container, marker, video, input_width, input_height, canvas_draw
     threeGLTFLoader.load("../Data/models/CesiumMan.glb", function (gltf) {
             model = gltf.scene.children[0];
             model.name = "CesiumMan";
+            model.scale.set(80,80,80);
 
             var animation = gltf.animations[0];
             var mixer = new THREE.AnimationMixer(model);
