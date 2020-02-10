@@ -24,7 +24,7 @@ var markers = {
     "pinball": {
         width: 1637,
         height: 2048,
-        dpi: 250,
+        dpi: 215,
         url: "./examples/DataNFT/pinball",
     },
 };
@@ -72,8 +72,17 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     var root = new THREE.Object3D();
     scene.add(root);
 
+    var objPositions;
+
     sphere.material.flatShading;
     sphere.scale.set(200, 200, 200);
+
+    var dimensions = new THREE.Box3().setFromObject(sphere);
+    console.log(dimensions);
+    objPositions = {
+        width: dimensions.max.x - dimensions.min.x,
+        height: dimensions.max.y - dimensions.min.y,
+    };
 
     root.matrixAutoUpdate = false;
     root.add(sphere);
@@ -158,6 +167,15 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
             world = null;
         } else {
             world = JSON.parse(msg.matrixGL_RH);
+
+            // ~nicolocarpignoli this is absolutely based on empirics. Have to test with other 3D models and
+            // other different images, possibly with different aspect ratio
+            if (!window.firstPositioning) {
+                window.firstPositioning = true;
+                sphere.position.y = (msg.width / msg.dpi) * 1000 / objPositions.width;
+                sphere.position.x = (msg.height / msg.dpi) * 1000 / objPositions.height;
+            }
+
             console.log("NFT width: ", msg.width);
             console.log("NFT height: ", msg.height);
             console.log("NFT dpi: ", msg.dpi);
@@ -178,11 +196,6 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
             sphere.visible = false;
         } else {
             sphere.visible = true;
-            var boundingBox = new THREE.Box3().setFromObject(sphere);
-            var size = boundingBox.getSize();
-            console.log(size);
-            sphere.position.x = size.x;
-            sphere.position.y = size.y;
 
             // interpolate matrix
             for (var i = 0; i < 16; i++) {
