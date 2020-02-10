@@ -70,8 +70,6 @@ function start( container, marker, video, input_width, input_height, canvas_draw
 
     var camera = new THREE.Camera();
     camera.matrixAutoUpdate = false;
-    // var camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
-    // camera.position.z = 400;
 
     scene.add(camera);
 
@@ -91,14 +89,9 @@ function start( container, marker, video, input_width, input_height, canvas_draw
 
     var objPositions;
 
-    threeGLTFLoader.load("../Data/models/Flamingo.glb", function (gltf) {
+    threeGLTFLoader.load("../Data/models/Duck.glb", function (gltf) {
             model = gltf.scene.children[0];
-
-            var animation = gltf.animations[0];
-            var mixer = new THREE.AnimationMixer(model);
-            mixers.push(mixer);
-            var action = mixer.clipAction(animation);
-            action.play();
+            model.name = "Duck";
 
             root.matrixAutoUpdate = false;
             root.add(model);
@@ -219,6 +212,8 @@ function start( container, marker, video, input_width, input_height, canvas_draw
             console.log("NFT width: ", msg.width);
             console.log("NFT height: ", msg.height);
             console.log("NFT dpi: ", msg.dpi);
+            var o_view = scene.getObjectByName('Duck');
+            console.log(o_view);
         }
     };
 
@@ -239,12 +234,6 @@ function start( container, marker, video, input_width, input_height, canvas_draw
     var tick = function() {
         draw();
         requestAnimationFrame(tick);
-
-        if (mixers.length > 0) {
-            for (var i = 0; i < mixers.length; i++) {
-                mixers[i].update(clock.getDelta());
-            }
-        }
     };
 
     var draw = function() {
