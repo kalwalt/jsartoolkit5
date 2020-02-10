@@ -92,7 +92,10 @@ function start( container, marker, video, input_width, input_height, canvas_draw
     threeGLTFLoader.load("../Data/models/Duck.glb", function (gltf) {
             model = gltf.scene.children[0];
             model.name = "Duck";
-
+            model.position.z = 0;
+            model.position.x = 10;
+            model.position.y = 10;
+            model.scale.set(1,1,1);
             root.matrixAutoUpdate = false;
             root.add(model);
 
@@ -203,11 +206,11 @@ function start( container, marker, video, input_width, input_height, canvas_draw
 
             // ~nicolocarpignoli this is absolutely based on empirics. Have to test with other 3D models and
             // other different images, possibly with different aspect ratio
-            if (!window.firstPositioning) {
+            /*if (!window.firstPositioning) {
                 window.firstPositioning = true;
                 model.position.y = (msg.width / msg.dpi) * 1000 / objPositions.width;
                 model.position.x = (msg.height / msg.dpi) * 1000 / objPositions.height;
-            }
+            }*/
 
             console.log("NFT width: ", msg.width);
             console.log("NFT height: ", msg.height);
