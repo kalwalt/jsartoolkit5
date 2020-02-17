@@ -29,7 +29,7 @@ var markers = {
         width: 1637,
         height: 2048,
         dpi: 215,
-        url: "../examples/DataNFT/pinball"
+        url: "../examples/DataNFT/Alterra_Postcard_2100"
     }
 };
 
