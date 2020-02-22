@@ -15,7 +15,7 @@
     <script type="text/javascript">
     var i = 3;
 
-      var APP = {
+    var APP = {
 		cam_dist: 10,
 
     ar: {transform: []},
@@ -57,19 +57,22 @@
 			//global camera
       var camera = new LS.Camera();
       camera.clear_color = true;
-      camera.background_color = [0, 0, 0, 0];
+      camera.background_color = [0, 0, 0, 1];
 			camera.center = [0,0,0];
-			camera.eye = [150,40,150];
+			camera.eye = [0,100,100];
 			camera.far = 1000;
-			camera.near = 1;
+			camera.near = 0.1;
+      camera.up = [0, 1, 0];
+      camera.fov = 45;
+      camera.viewport = [0, 0, 1, 1];
       var nodeCam = new LS.SceneNode("cameraNode");
       nodeCam.addComponent(camera);
-      LS.GlobalScene.root.addChild( nodeCam );;
+      LS.GlobalScene.root.addChild( nodeCam );
 
       // add a simple cube and attach it to a node
       var node = new LS.SceneNode(); //create a node
       LS.GlobalScene.root.addChild( node ); //add to the scene
-      var mesh = GL.Mesh.cube({size: 10}); // add a simple cube with size of 10
+      var mesh = GL.Mesh.cube({size: 1}); // add a simple cube with size of 1
       var comp = new LS.Components.MeshRenderer({mesh: mesh }); //create a mesh renderer
       node.addComponent( comp ); //add to the node
       node.material =  new LS.StandardMaterial({ color: [0.5,0.5,0.5] });
@@ -88,8 +91,8 @@
             video: true
         };
         if( window.innerWidth < 800 ) {
-            var width = ( window.innerWidth < window.innerHeight ) ? 240 : 360;
-            var height = ( window.innerWidth < window.innerHeight ) ? 360 : 240;
+            var width = ( window.innerWidth < window.innerHeight ) ? 240 : 320;
+            var height = ( window.innerWidth < window.innerHeight ) ? 320 : 240;
 
             var aspectRatio = window.innerWidth / window.innerHeight;
 
