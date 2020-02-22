@@ -4,7 +4,6 @@
  * @author ThorstenBux github.com/ThorstenBux
  */
 
-
 var
 	exec = require('child_process').exec,
 	path = require('path'),
@@ -158,7 +157,7 @@ FLAGS += ' -s USE_ZLIB=1';
 FLAGS += ' -s USE_LIBJPEG';
 FLAGS += ' --memory-init-file 0 '; // for memless file
 
-var WASM_FLAGS = ' -s BINARYEN_TRAP_MODE=clamp'
+var WASM_FLAGS = ' -s BINARYEN_TRAP_MODE=clamp -s SINGLE_FILE=1 '
 
 var PRE_FLAGS = ' --pre-js ' + path.resolve(__dirname, '../js/artoolkit.api.js') +' ';
 
@@ -233,11 +232,6 @@ var compile_wasm = format(EMCC + ' ' + INCLUDES + ' '
     + FLAGS + WASM_FLAGS + DEFINES + PRE_FLAGS + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
     OUTPUT_PATH, OUTPUT_PATH, BUILD_WASM_FILE);
 
-var compile_all = format(EMCC + ' ' + INCLUDES + ' '
-    + ar_sources.join(' ')
-    + FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
-    OUTPUT_PATH, BUILD_DEBUG_FILE);
-
 /*
  * Run commands
  */
@@ -278,11 +272,8 @@ function addJob(job) {
 
 addJob(clean_builds);
 addJob(compile_arlib);
-//addJob(compile_kpm);
-// compile_kpm
 addJob(compile_combine);
 addJob(compile_wasm);
 addJob(compile_combine_min);
-// addJob(compile_all);
 
 runJob();
