@@ -2,7 +2,7 @@
 
 Emscripten port of [ARToolKit](https://github.com/artoolkitx/artoolkit5) to JavaScript.
 
-## MArkers Types
+## Markers Types
 
 JSARToolKit5 support these types of markers:
 - Square pictorial markers
@@ -62,10 +62,11 @@ See examples/simple_image_wasm.html for details.
 3. `npm install`
 4. From inside jsartoolkit5 directory run `docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten-slim:latest bash` to download and start the container, in preparation for the build
 5. `docker exec emscripten npm run build-local` to build JS version of artoolkit5
-6. `docker stop emscripten` to stop the container after the build, if needed
-7. `docker rm emscripten` to remove the container
-8. `docker rmi trzeci/emscripten-slim:latest` to remove the Docker image, if you don't need it anymore
-9. The build artifacts will appear in `/build`. There's a build with debug symbols in `artoolkit.debug.js` file and the optimized build with bundled JS API in `artoolkit.min.js`; also, a WebAssembly build artoolkit_wasm.js and artoolkit_wasm.wasm
+6. `docker exec emscripten npm run build-local-no-libar` to build JS version of artoolkit5 without rebuilding libar.bc
+7. `docker stop emscripten` to stop the container after the build, if needed
+8. `docker rm emscripten` to remove the container
+9. `docker rmi trzeci/emscripten-slim:latest` to remove the Docker image, if you don't need it anymore
+10. The build artifacts will appear in `/build`. There's a build with debug symbols in `artoolkit.debug.js` file and the optimized build with bundled JS API in `artoolkit.min.js`; also, a WebAssembly build artoolkit_wasm.js and artoolkit_wasm.wasm
 
 ### ⚠️ Not recommended ⚠️ : Build local with manual emscripten setup
 
@@ -89,7 +90,7 @@ jsartoolkit5 aim is to create a Javascript version of artoolkit5. First, you nee
   3. Run `npm install`
   4. Run `npm run build-local`
 
-During development, you can run ```npm run watch```, it will rebuild the library everytime you change ```./js/``` directory.
+During development, you can run ```npm run watch```, it will rebuild the library everytime you change ```./js/``` directory. You can also run the script with the option ```npm run build-local-no-libar``` if you have already build libar.bc and you don't want to rebuild.
 
 4. The built ASM.js files are in `/build`. There's a build with debug symbols in `artoolkit.debug.js` and the optimized build with bundled JS API in `artoolkit.min.js`.
 
