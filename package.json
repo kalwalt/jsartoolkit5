@@ -32,6 +32,7 @@
   },
   "scripts": {
     "build-local": "node tools/makem.js; echo Built at `date`",
+    "build-local-no-libar": "node tools/makem.js --no-libar; echo Built at `date`",
     "watch": "./node_modules/.bin/watch 'npm run build' ./js/",
     "create-doc": "grunt jsdoc",
     "test": "http-server -p 8085",
