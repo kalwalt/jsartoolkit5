@@ -8,8 +8,8 @@
 var
 	exec = require('child_process').exec,
 	path = require('path'),
-  fs = require('fs'),
-  os = require('os'),
+	fs = require('fs'),
+	os = require('os'),
 	child;
 
 const platform = os.platform();
@@ -85,7 +85,7 @@ function matchAll(patterns, prefix="") {
     return r;
 }
 
-	ar_sources = matchAll([
+  ar_sources = matchAll([
     'AR/arLabelingSub/*.c',
     'AR/*.c',
     'ARICP/*.c',
@@ -177,10 +177,8 @@ FLAGS += ' --bind ';
 
 /* DEBUG FLAGS */
 var DEBUG_FLAGS = ' -g ';
-// DEBUG_FLAGS += ' -s ASSERTIONS=2 '
 DEBUG_FLAGS += ' -s ASSERTIONS=1 '
 DEBUG_FLAGS += ' --profiling '
-// DEBUG_FLAGS += ' -s EMTERPRETIFY_ADVISE=1 '
 DEBUG_FLAGS += ' -s ALLOW_MEMORY_GROWTH=1';
 DEBUG_FLAGS += '  -s DEMANGLE_SUPPORT=1 ';
 
@@ -248,11 +246,6 @@ var compile_wasm = format(EMCC + ' ' + INCLUDES + ' '
     + FLAGS + WASM_FLAGS + DEFINES + PRE_FLAGS + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
     OUTPUT_PATH, OUTPUT_PATH, BUILD_WASM_FILE);
 
-var compile_all = format(EMCC + ' ' + INCLUDES + ' '
-    + ar_sources.join(' ')
-    + FLAGS + ' ' + DEFINES + ' -o {OUTPUT_PATH}{BUILD_FILE} ',
-    OUTPUT_PATH, BUILD_DEBUG_FILE);
-
 /*
  * Run commands
  */
@@ -293,14 +286,12 @@ function addJob(job) {
 
 addJob(clean_builds);
 addJob(compile_arlib);
-//addJob(compile_kpm);
-// compile_kpm
 addJob(compile_combine);
 addJob(compile_wasm);
 addJob(compile_combine_min);
-// addJob(compile_all);
+
 if (NO_LIBAR == true){
-	jobs.splice(1,1);
+  jobs.splice(1,1);
 }
 
 runJob();
