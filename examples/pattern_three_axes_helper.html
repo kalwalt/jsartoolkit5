@@ -1,0 +1,106 @@
+<html>
+<head>
+<title>Pattern marker example with Three.js</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+<style>
+html,body {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	text-align: center;
+	overflow-x: hidden;
+}
+.portrait canvas {
+	transform-origin: 0 0;
+	transform: rotate(-90deg) translateX(-100%);
+}
+.desktop canvas {
+ 	transform: scale(-1, 1);
+}
+</style>
+</head>
+<body>
+
+<h1>Pattern marker example with Three.js</h1>
+<p>On Chrome on Android, tap the screen to start playing video stream.</p>
+<p>Show  <a href="https://github.com/artoolkit/artoolkit5/blob/master/doc/patterns/Hiro%20pattern.pdf">Hiro pattern</a> and <a href="https://github.com/artoolkit/artoolkit5/blob/master/doc/patterns/Kanji%20pattern.pdf">Kanji pattern</a> to camera to display a colorful objects on top of them. Tap the screen to rotate the objects.
+
+<p>&larr; <a href="index.html">Back to examples</a></p>
+
+<!--<script async src="../build/artoolkitNft.min.js"></script>-->
+<script async src="../build/artoolkit.debug.js"></script>
+<script src="../js/artoolkit.api.js"></script>
+<script async src="js/third_party/three.js/three.min.js"></script>
+<script async src="../js/artoolkit.three.js"></script>
+
+<script>
+
+window.ARThreeOnLoad = function() {
+
+	ARController.getUserMediaThreeScene({maxARVideoSize: 320, cameraParam: 'Data/camera_para-iPhone 5 rear 640x480 1.0m.dat',
+	onSuccess: function(arScene, arController, arCamera) {
+
+		document.body.className = arController.orientation;
+
+		var renderer = new THREE.WebGLRenderer({antialias: true});
+		if (arController.orientation === 'portrait') {
+			var w = (window.innerWidth / arController.videoHeight) * arController.videoWidth;
+			var h = window.innerWidth;
+			renderer.setSize(w, h);
+			renderer.domElement.style.paddingBottom = (w-h) + 'px';
+		} else {
+			if (/Android|mobile|iPad|iPhone/i.test(navigator.userAgent)) {
+				renderer.setSize(window.innerWidth, (window.innerWidth / arController.videoWidth) * arController.videoHeight);
+			} else {
+				renderer.setSize(arController.videoWidth, arController.videoHeight);
+				document.body.className += ' desktop';
+			}
+		}
+
+		document.body.insertBefore(renderer.domElement, document.body.firstChild);
+
+		var rotationV = 0;
+		var rotationTarget = 0;
+
+		renderer.domElement.addEventListener('click', function(ev) {
+			ev.preventDefault();
+			rotationTarget += 1;
+		}, false);
+
+		var cube = new THREE.Mesh(
+		 	new THREE.CubeGeometry(1,1,1),
+			new THREE.MeshNormalMaterial()
+		);
+		cube.material.flatShading;
+		cube.position.z = 0.5;
+
+		var helper = new THREE.AxesHelper(5);
+
+		arController.loadMarker('Data/patt.hiro', function(markerId) {
+			var markerRoot = arController.createThreeMarker(markerId);
+			markerRoot.add(cube);
+			markerRoot.add(helper);
+			arScene.scene.add(markerRoot);
+		});
+
+		var tick = function() {
+			arScene.process();
+			arScene.renderOn(renderer);
+			requestAnimationFrame(tick);
+		};
+
+		tick();
+
+	}});
+
+	delete window.ARThreeOnLoad;
+
+};
+
+if (window.ARController && ARController.getUserMediaThreeScene) {
+	ARThreeOnLoad();
+}
+</script>
+
+</body>
+</html>
