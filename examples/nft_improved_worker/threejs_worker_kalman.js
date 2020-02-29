@@ -76,7 +76,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     cube.position.z = 0;
     cube.position.x = 100;
     cube.position.y = 100;
-    cube.scale.set(100, 100, 100);
+    cube.scale.set(1000, 1000, 1000);
 
     root.matrixAutoUpdate = false;
     root.add(cube);
@@ -166,7 +166,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
 
     var lasttime = Date.now();
     var time = 0;
-    var kf = new KalmanFilter({R: 0.001, Q: 40, A: 0.5});
+    var kf = new KalmanFilter({R: 0.1, Q: 5, A: 0.5});
 
     var draw = function() {
         render_update();
@@ -184,10 +184,15 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
                 for (var i = 0; i < 12; i++) {
                   filterMat[i] = kf.filter(world[i]);
                 }
+
+                filterMat[3] = world[3] // always equal to 0
+                filterMat[7] = world[7] // always equal to 0
+                filterMat[11] = world[11] // always equal to 0
+                filterMat[15] = world[15] // always equal to 1
                 filterMat[12] = world[12]
                 filterMat[13] = world[13]
                 filterMat[14] = world[14]
-                filterMat[15] = world[15]
+
                 console.log(world);
                 console.log(filterMat);
 
