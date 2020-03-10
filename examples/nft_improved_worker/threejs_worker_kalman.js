@@ -181,9 +181,16 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
           cube.visible = true;
                 // interpolate matrix
                 var filterMat = [];
-                for (var i = 0; i < 12; i++) {
-                  filterMat[i] = kf.filter(world[i]);
-                }
+
+                filterMat[0] = kf.filter(world[0])
+                filterMat[1] = kf.filter(world[1])
+                filterMat[2] = kf.filter(world[2])
+                filterMat[4] = kf.filter(world[4])
+                filterMat[5] = kf.filter(world[5])
+                filterMat[6] = kf.filter(world[6])
+                filterMat[8] = kf.filter(world[8])
+                filterMat[9] = kf.filter(world[9])
+                filterMat[10] = kf.filter(world[10])
 
                 filterMat[3] = world[3] // always equal to 0
                 filterMat[7] = world[7] // always equal to 0
@@ -197,7 +204,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
                 console.log(filterMat);
 
                 // set matrix of 'root' by detected 'world' matrix
-                setMatrix(root.matrix, filterMat);
+                setMatrix(root.matrix, trackedMatrix.interpolated);
         }
         renderer.render(scene, camera);
     };
