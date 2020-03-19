@@ -68,6 +68,7 @@ struct arController {
 	int patt_id = 0; // Running pattern marker id
 
 	ARdouble cameraLens[16];
+	ARdouble cameraLensL[16];
 	AR_PIXEL_FORMAT pixFormat = AR_PIXEL_FORMAT_RGBA;
 };
 
@@ -396,6 +397,68 @@ extern "C" {
 	* Camera loading *
 	*****************/
 
+	//
+  // Convert a camera parameter structure into an OpenGL projection matrix.
+  //
+  void arglCameraFrustum(const ARParam *cparam, const ARdouble focalmin, const ARdouble focalmax, ARdouble m_projection[16])
+  {
+	    ARdouble    icpara[3][4];
+      ARdouble    trans[3][4];
+      ARdouble    p[3][3], q[4][4];
+    	int         width, height;
+      int         i, j;
+
+      width  = cparam->xsize;
+      height = cparam->ysize;
+
+      if (arParamDecompMat(cparam->mat, icpara, trans) < 0) {
+          ARLOGe("arglCameraFrustum(): arParamDecompMat() indicated parameter error.\n");
+          return;
+      }
+	  for (i = 0; i < 4; i++) {
+          icpara[1][i] = (height - 1)*(icpara[2][i]) - icpara[1][i];
+      }
+
+      for(i = 0; i < 3; i++) {
+          for(j = 0; j < 3; j++) {
+              p[i][j] = icpara[i][j] / icpara[2][2];
+          }
+      }
+      q[0][0] = (2.0 * p[0][0] / (width - 1));
+      q[0][1] = (2.0 * p[0][1] / (width - 1));
+      q[0][2] = ((2.0 * p[0][2] / (width - 1))  - 1.0);
+      q[0][3] = 0.0;
+
+      q[1][0] = 0.0;
+      q[1][1] = (2.0 * p[1][1] / (height - 1));
+      q[1][2] = ((2.0 * p[1][2] / (height - 1)) - 1.0);
+      q[1][3] = 0.0;
+
+      q[2][0] = 0.0;
+      q[2][1] = 0.0;
+      q[2][2] = (focalmax + focalmin)/(focalmax - focalmin);
+      q[2][3] = -2.0 * focalmax * focalmin / (focalmax - focalmin);
+
+      q[3][0] = 0.0;
+      q[3][1] = 0.0;
+      q[3][2] = 1.0;
+      q[3][3] = 0.0;
+
+      for (i = 0; i < 4; i++) { // Row.
+	  	// First 3 columns of the current row.
+          for (j = 0; j < 3; j++) { // Column.
+              m_projection[i + j*4] = q[i][0] * trans[0][j] +
+			  						q[i][1] * trans[1][j] +
+			  						q[i][2] * trans[2][j];
+          }
+	  	// Fourth column of the current row.
+          m_projection[i + 3*4] = q[i][0] * trans[0][3] +
+			  					q[i][1] * trans[1][3] +
+			  					q[i][2] * trans[2][3] +
+			  					q[i][3];
+      }
+  }
+
 	int loadCamera(std::string cparam_name) {
 		ARParam param;
 		if (arParamLoad(cparam_name.c_str(), 1, &param) < 0) {
@@ -455,6 +518,7 @@ extern "C" {
 		// ARLOGi("setCamera(): Pattern handler attached.\n");
 
 		arglCameraFrustumRH(&((arc->paramLT)->param), arc->nearPlane, arc->farPlane, arc->cameraLens);
+		arglCameraFrustum(&((arc->paramLT)->param), arc->nearPlane, arc->farPlane, arc->cameraLensL); // required for the old Camera Matrix
 
 		arc->kpmHandle = createKpmHandle(arc->paramLT);
 
@@ -1098,13 +1162,15 @@ extern "C" {
 			frameMalloc["framepointer"] = $1;
 			frameMalloc["framesize"] = $2;
 			frameMalloc["camera"] = $3;
-			frameMalloc["transform"] = $4;
-			frameMalloc["videoLumaPointer"] = $5;
+			frameMalloc["cameraL"] = $4;
+			frameMalloc["transform"] = $5;
+			frameMalloc["videoLumaPointer"] = $6;
 		},
 			arc->id,
 			arc->videoFrame,
 			arc->videoFrameSize,
 			arc->cameraLens,
+			arc->cameraLensL,
 			gTransform,
 			arc->videoLuma          //$5
 		);

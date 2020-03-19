@@ -111,6 +111,7 @@
         this.dataHeap = null;
         this.videoLuma = null;
         this.camera_mat = null;
+        this.camera_mat_L = null;
         this.marker_transform_mat = null;
         this.videoLumaPointer = null;
         this._bwpointer = undefined;
@@ -920,6 +921,15 @@
         return this.camera_mat;
     };
 
+  /**
+   * Returns the projection matrix L computed from camera parameters for the ARController.
+   *
+   * @return {Float64Array} The 16-element WebGL camera matrix console.log(); for the ARController camera parameters.
+   */
+    ARController.prototype.getCameraMatrixL = function () {
+        return this.camera_mat_L;
+    };
+
 	/**
 		Returns the shared ARToolKit 3x4 marker transformation matrix, used for passing and receiving
 		marker transforms to/from the Emscripten side.
@@ -1309,6 +1319,7 @@
         this.videoLuma = new Uint8Array(Module.HEAPU8.buffer, this.videoLumaPointer, this.framesize / 4);
 
         this.camera_mat = new Float64Array(Module.HEAPU8.buffer, params.camera, 16);
+        this.camera_mat_L = new Float64Array(Module.HEAPU8.buffer, params.cameraL, 16);
         this.marker_transform_mat = new Float64Array(Module.HEAPU8.buffer, params.transform, 12);
 
         this.setProjectionNearPlane(0.1)
