@@ -208,8 +208,10 @@ function start( container, marker, video, input_width, input_height, canvas_draw
             // other different images, possibly with different aspect ratio
             if (!window.firstPositioning) {
                 window.firstPositioning = true;
-                model.position.y = (msg.width / msg.dpi) * 1000 / objPositions.width;
-                model.position.x = (msg.height / msg.dpi) * 1000 / objPositions.height;
+                //model.position.y = (msg.width / msg.dpi) * 1000 / objPositions.width;
+                //model.position.x = (msg.height / msg.dpi) * 1000 / objPositions.height;
+                model.position.y = (msg.width / msg.dpi * 2.54 * 10)/2.0;
+                model.position.x = (msg.height / msg.dpi * 2.54 * 10)/2.0;
             }
 
             console.log("NFT width: ", msg.width);
