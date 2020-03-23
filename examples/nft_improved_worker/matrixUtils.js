@@ -67,9 +67,11 @@ function findPoint(pw, ph, ox, oy, pscale, sscale, proj, world, marker) {
   var height = marker.height;
   var dpi = marker.dpi;
 
-  var w = width / dpi * 2.54 * 10;
-  var h = height / dpi * 2.54 * 10;
+  var w = (width / dpi * 2.54 * 10)/2;
+  var h = (height / dpi * 2.54 * 10)/2;
+  console.log('factors: ' + w + ' '+ h );
   var mat = multiplyMatrices(proj, world);
+  var posPoint = drawpoint(pw, ph, ox, oy, pscale, sscale, mat, w, h, 0);
 
-  return drawpoint(pw, ph, ox, oy, pscale, sscale, mat, w/2, h/2, 0);
+  return posPoint;
 }

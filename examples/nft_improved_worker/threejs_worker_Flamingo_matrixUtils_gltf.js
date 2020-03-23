@@ -211,13 +211,12 @@ function start( container, marker, video, input_width, input_height, canvas_draw
             // other different images, possibly with different aspect ratio
             if (!window.firstPositioning) {
                 window.firstPositioning = true;
-                //model.position.y = (msg.width / msg.dpi) * 1000 / objPositions.width;
-                //model.position.x = (msg.height / msg.dpi) * 1000 / objPositions.height;
-                // model.position.y = (msg.width / msg.dpi * 2.54 * 10)/2.0;
-                // model.position.x = (msg.height / msg.dpi * 2.54 * 10)/2.0;
                 var pos = findPoint(pw, ph, ox, oy, pscale, sscale, proj, world, marker);
-                model.position.y = pos.y;
-                model.position.x = pos.x;
+                console.log('model position in screen coords: ', pos);
+                console.log('model matrixWorld: ', model.matrixWorld);
+                model.matrixWorld.setPosition(pos.x, pos.y, 0);
+                model.matrixAutoUpdate = false;
+                console.log('world matrix : ', world);
             }
 
             console.log("NFT width: ", msg.width);
