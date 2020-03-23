@@ -54,6 +54,7 @@ function glpointToCanvas(xyz) {
     return {
         x: (xyz.x + 1) * 0.5 * pw / pscale * sscale - ox / pscale * sscale,
         y: (1 - xyz.y) * 0.5 * ph / pscale * sscale - oy / pscale * sscale,
+        z: xyz.z,
     }
 }
 function drawpoint(pw, ph, ox, oy, pscale, sscale, mat, x, y, z) {
