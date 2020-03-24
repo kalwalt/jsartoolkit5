@@ -15,6 +15,7 @@ var
 const platform = os.platform();
 
 var HAVE_NFT = 1;
+var WITH_FILTERING = 1;
 
 var EMSCRIPTEN_ROOT = process.env.EMSCRIPTEN;
 var ARTOOLKIT5_ROOT = process.env.ARTOOLKIT5_ROOT || path.resolve(__dirname, "../emscripten/artoolkit5");
@@ -150,6 +151,7 @@ if (HAVE_NFT) {
 
 var DEFINES = ' ';
 if (HAVE_NFT) DEFINES += ' -D HAVE_NFT ';
+if (WITH_FILTERING) DEFINES += ' -D WITH_FILTERING ';
 
 var FLAGS = '' + OPTIMIZE_FLAGS;
 FLAGS += ' -Wno-warn-absolute-paths ';

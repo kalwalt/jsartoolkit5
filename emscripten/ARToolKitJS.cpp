@@ -53,9 +53,12 @@ struct arController {
 
 	KpmHandle* kpmHandle;
 	AR2HandleT* ar2Handle;
+
+	#if WITH_FILTERING
 	ARFilterTransMatInfo *ftmi;
 	ARdouble   filterCutoffFrequency = 60.0;
 	ARdouble   filterSampleRate = 120.0;
+	#endif
 
 	int detectedPage = -2;  // -2 Tracking not inited, -1 tracking inited OK, >= 0 tracking online on page.
 
@@ -119,15 +122,22 @@ extern "C" {
 		int kpmResultNum = -1;
 
 		float trans[3][4];
+
+		#if WITH_FILTERING
 		ARdouble transF[3][4];
 		ARdouble transFLerp[3][4];
 		memset( transFLerp, 0, 3 * 4 * sizeof(ARdouble) );
+		#endif
+
 		float err = -1;
 		if (arc->detectedPage == -2) {
 			kpmMatching( arc->kpmHandle, arc->videoLuma );
 			kpmGetResult( arc->kpmHandle, &kpmResult, &kpmResultNum );
-			ARLOGi("filterSampleRate: %f\n", arc->filterSampleRate);
+
+			#if WITH_FILTERING
 			arc->ftmi = arFilterTransMatInit(arc->filterSampleRate, arc->filterCutoffFrequency);
+			#endif
+
 			int i, j, k;
 			int flag = -1;
 			for( i = 0; i < kpmResultNum; i++ ) {
@@ -155,6 +165,8 @@ extern "C" {
 
 		if (arc->detectedPage >= 0) {
 			int trackResult = ar2TrackingMod(arc->ar2Handle, arc->surfaceSet[arc->detectedPage], arc->videoFrame, trans, &err);
+
+      #if WITH_FILTERING
 			for (int j = 0; j < 3; j++) {
 				for (int k = 0; k < 4; k++) {
 					transF[j][k] = trans[j][k];
@@ -173,6 +185,7 @@ extern "C" {
 			}
 
 			matrixLerp(transF, transFLerp, 0.95);
+			#endif
 
 			if( trackResult < 0 ) {
 				ARLOGi("Tracking lost. %d\n", trackResult);
@@ -214,6 +227,8 @@ extern "C" {
 				markerIndex,
 				err,
 
+        #if WITH_FILTERING
+
 				transFLerp[0][0],
 				transFLerp[0][1],
 				transFLerp[0][2],
@@ -228,6 +243,25 @@ extern "C" {
 				transFLerp[2][1],
 				transFLerp[2][2],
 				transFLerp[2][3]
+
+				#else
+
+				trans[0][0],
+				trans[0][1],
+				trans[0][2],
+				trans[0][3],
+
+				trans[1][0],
+				trans[1][1],
+				trans[1][2],
+				trans[1][3],
+
+				trans[2][0],
+				trans[2][1],
+				trans[2][2],
+				trans[2][3]
+
+				#endif
 			);
         } else {
 			EM_ASM_({
@@ -382,10 +416,13 @@ extern "C" {
 			arPattDetach(arc->arhandle);
 			arDeleteHandle(arc->arhandle);
 			arc->arhandle = NULL;
+
+			#if WITH_FILTERING
 			if (arc->ftmi) {
 					arFilterTransMatFinal(arc->ftmi);
 					arc->ftmi = NULL;
 			}
+			#endif
 		}
 		if (arc->ar3DHandle != NULL) {
 			ar3DDeleteHandle(&(arc->ar3DHandle));
