@@ -54,8 +54,8 @@ struct arController {
 	KpmHandle* kpmHandle;
 	AR2HandleT* ar2Handle;
 	ARFilterTransMatInfo *ftmi;
-	ARdouble   filterCutoffFrequency = 25.0;
-	ARdouble   filterSampleRate = 50.0;
+	ARdouble   filterCutoffFrequency = 60.0;
+	ARdouble   filterSampleRate = 120.0;
 
 	int detectedPage = -2;  // -2 Tracking not inited, -1 tracking inited OK, >= 0 tracking online on page.
 
@@ -102,14 +102,6 @@ extern "C" {
 	void matrixLerp(ARdouble src[3][4], ARdouble dst[3][4], float interpolationFactor) {
 		for (int i=0; i<3; i++) {
 			for (int j=0; j<4; j++) {
-				dst[i][j] = dst[i][j] + (src[i][j] - dst[i][j]) / interpolationFactor;
-			}
-		}
-	}
-
-	void matrixLerp2(ARdouble src[3][4], ARdouble dst[3][4], float interpolationFactor) {
-		for (int i=0; i<3; i++) {
-			for (int j=0; j<4; j++) {
 				dst[i][j] = (1 - interpolationFactor) * src[i][j] + interpolationFactor * dst[i][j];
 			}
 		}
@@ -134,6 +126,7 @@ extern "C" {
 		if (arc->detectedPage == -2) {
 			kpmMatching( arc->kpmHandle, arc->videoLuma );
 			kpmGetResult( arc->kpmHandle, &kpmResult, &kpmResultNum );
+			ARLOGi("filterSampleRate: %f\n", arc->filterSampleRate);
 			arc->ftmi = arFilterTransMatInit(arc->filterSampleRate, arc->filterCutoffFrequency);
 			int i, j, k;
 			int flag = -1;
@@ -179,7 +172,7 @@ extern "C" {
 					ARLOGe("arFilterTransMat error with marker %d.\n", markerIndex);
 			}
 
-			matrixLerp2(transF, transFLerp, 0.5);
+			matrixLerp(transF, transFLerp, 0.95);
 
 			if( trackResult < 0 ) {
 				ARLOGi("Tracking lost. %d\n", trackResult);
