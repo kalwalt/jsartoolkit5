@@ -58,7 +58,6 @@ function start( container, marker, video, input_width, input_height, canvas_draw
     var canvas_process = document.createElement("canvas");
     var context_process = canvas_process.getContext("2d");
 
-    // var context_draw = canvas_draw.getContext('2d');
     var renderer = new THREE.WebGLRenderer({
         canvas: canvas_draw,
         alpha: true,
@@ -70,8 +69,6 @@ function start( container, marker, video, input_width, input_height, canvas_draw
 
     var camera = new THREE.Camera();
     camera.matrixAutoUpdate = false;
-    // var camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 1000);
-    // camera.position.z = 400;
 
     scene.add(camera);
 
@@ -89,6 +86,7 @@ function start( container, marker, video, input_width, input_height, canvas_draw
     threeGLTFLoader.load("../Data/models/Flamingo.glb", function (gltf) {
             model = gltf.scene.children[0];
             model.name = 'Flamingo';
+            model.rotation.x = Math.PI/2;
 
             var animation = gltf.animations[0];
             var mixer = new THREE.AnimationMixer(model);
@@ -98,13 +96,6 @@ function start( container, marker, video, input_width, input_height, canvas_draw
 
             root.matrixAutoUpdate = false;
             root.add(model);
-
-            var dimensions = new THREE.Box3().setFromObject(model);
-            objPositions = {
-                width: dimensions.max.x - dimensions.min.x,
-                height: dimensions.max.y - dimensions.min.y,
-            };
-            console.log('3D Model sizes: ', objPositions.width, objPositions.height);
         }
     );
 
@@ -208,10 +199,8 @@ function start( container, marker, video, input_width, input_height, canvas_draw
             // other different images, possibly with different aspect ratio
             if (!window.firstPositioning) {
                 window.firstPositioning = true;
-                //model.position.y = (msg.width / msg.dpi) * 1000 / objPositions.width;
-                //model.position.x = (msg.height / msg.dpi) * 1000 / objPositions.height;
-                model.position.y = (msg.width / msg.dpi * 2.54 * 10)/2.0;
-                model.position.x = (msg.height / msg.dpi * 2.54 * 10)/2.0;
+                model.position.y = (msg.height / msg.dpi * 2.54 * 10)/2.0;
+                model.position.x = (msg.width / msg.dpi * 2.54 * 10)/2.0;
             }
 
             console.log("NFT width: ", msg.width);

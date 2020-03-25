@@ -25,7 +25,7 @@ var trackedMatrix = {
 }
 
 var markers = {
-    pinball: {
+    alterra: {
         width: 1637,
         height: 2048,
         dpi: 215,
@@ -58,7 +58,6 @@ function start( container, marker, video, input_width, input_height, canvas_draw
     var canvas_process = document.createElement("canvas");
     var context_process = canvas_process.getContext("2d");
 
-    // var context_draw = canvas_draw.getContext('2d');
     var renderer = new THREE.WebGLRenderer({
         canvas: canvas_draw,
         alpha: true,
@@ -85,20 +84,13 @@ function start( container, marker, video, input_width, input_height, canvas_draw
     var objPositions;
 
     threeGLTFLoader.load("../Data/models/Duck.glb", function (gltf) {
-            model = gltf.scene.children[0];
+            model = gltf.scene;
             model.name = "Duck";
-            model.scale.set(1, 1, 1);
+            model.scale.set(100, 100, 100);
+            model.rotation.x = Math.PI/2;
 
             root.matrixAutoUpdate = false;
             root.add(model);
-
-            var dimensions = new THREE.Box3().setFromObject(model);
-            objPositions = {
-              width: dimensions.max.x - dimensions.min.x,
-              height: dimensions.max.y - dimensions.min.y
-            };
-
-            console.log('3D Model sizes: ', objPositions.width, objPositions.height);
         }
     );
 
@@ -202,8 +194,8 @@ function start( container, marker, video, input_width, input_height, canvas_draw
             // other different images, possibly with different aspect ratio
             if (!window.firstPositioning) {
                 window.firstPositioning = true;
-                model.position.y = (msg.width / msg.dpi) * 1000 / objPositions.width;
-                model.position.x = (msg.height / msg.dpi) * 1000 / objPositions.height;
+                model.position.y = (msg.height / msg.dpi * 2.54 * 10)/2.0;
+                model.position.x = (msg.width / msg.dpi * 2.54 * 10)/2.0;
             }
 
             console.log("NFT width: ", msg.width);

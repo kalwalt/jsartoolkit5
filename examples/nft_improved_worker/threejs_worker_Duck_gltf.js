@@ -83,17 +83,11 @@ function start( container, marker, video, input_width, input_height, canvas_draw
 
     var objPositions;
 
-    threeGLTFLoader.load("../Data/models/CesiumMan.glb", function (gltf) {
+    threeGLTFLoader.load("../Data/models/Duck.glb", function (gltf) {
             model = gltf.scene;
-            model.name = "CesiumMan";
-            model.scale.set(80,80,80);
+            model.name = "Duck";
+            model.scale.set(100, 100, 100);
             model.rotation.x = Math.PI/2;
-
-            var animation = gltf.animations[0];
-            var mixer = new THREE.AnimationMixer(model);
-            mixers.push(mixer);
-            var action = mixer.clipAction(animation);
-            action.play();
 
             root.matrixAutoUpdate = false;
             root.add(model);
@@ -207,7 +201,7 @@ function start( container, marker, video, input_width, input_height, canvas_draw
             console.log("NFT width: ", msg.width);
             console.log("NFT height: ", msg.height);
             console.log("NFT dpi: ", msg.dpi);
-            var o_view = scene.getObjectByName('CesiumMan');
+            var o_view = scene.getObjectByName('Duck');
             console.log(o_view);
         }
     };
@@ -229,12 +223,6 @@ function start( container, marker, video, input_width, input_height, canvas_draw
     var tick = function() {
         draw();
         requestAnimationFrame(tick);
-
-        if (mixers.length > 0) {
-            for (var i = 0; i < mixers.length; i++) {
-                mixers[i].update(clock.getDelta());
-            }
-        }
     };
 
     var draw = function() {

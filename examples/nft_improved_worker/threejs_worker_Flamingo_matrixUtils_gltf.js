@@ -100,13 +100,6 @@ function start( container, marker, video, input_width, input_height, canvas_draw
 
             root.matrixAutoUpdate = false;
             root.add(model);
-
-            var dimensions = new THREE.Box3().setFromObject(model);
-            objPositions = {
-                width: dimensions.max.x - dimensions.min.x,
-                height: dimensions.max.y - dimensions.min.y,
-            };
-            console.log('3D Model sizes: ', objPositions.width, objPositions.height);
         }
     );
 
@@ -207,17 +200,14 @@ function start( container, marker, video, input_width, input_height, canvas_draw
             proj = JSON.parse(msg.proj);
             world = JSON.parse(msg.matrixGL_RH);
 
-            // ~nicolocarpignoli this is absolutely based on empirics. Have to test with other 3D models and
-            // other different images, possibly with different aspect ratio
-            if (!window.firstPositioning) {
-                window.firstPositioning = true;
-                var pos = findPoint(pw, ph, ox, oy, pscale, sscale, proj, world, marker);
-                console.log('model position in screen coords: ', pos);
-                console.log('model matrixWorld: ', model.matrixWorld);
-                model.matrixWorld.setPosition(pos.x, pos.y, 0);
-                model.matrixAutoUpdate = false;
-                console.log('world matrix : ', world);
-            }
+            var pos = findPoint(pw, ph, ox, oy, pscale, sscale, proj, world, marker);
+            console.log('model position in screen coords: ', pos);
+            console.log('model matrixWorld: ', root.matrixWorld);
+            root.matrixWorldAutoUpdate = false;
+            root.matrixWorld.setPosition(pos.x, pos.y, pos.z);
+            root.updateMatrixWorld();
+
+            console.log('world matrix : ', root);
 
             console.log("NFT width: ", msg.width);
             console.log("NFT height: ", msg.height);
