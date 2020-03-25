@@ -73,10 +73,10 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     scene.add(root);
 
     cube.material.flatShading;
+    cube.scale.set(1000, 1000, 1000);
     cube.position.z = 0;
     cube.position.x = 100;
     cube.position.y = 100;
-    cube.scale.set(1000, 1000, 1000);
 
     root.matrixAutoUpdate = false;
     root.add(cube);
@@ -192,10 +192,11 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
                 filterMat[9] = kf.filter(world[9])
                 filterMat[10] = kf.filter(world[10])
 
-                filterMat[3] = world[3] // always equal to 0
-                filterMat[7] = world[7] // always equal to 0
-                filterMat[11] = world[11] // always equal to 0
-                filterMat[15] = world[15] // always equal to 1
+
+                filterMat[3] = 0.0 // always equal to 0
+                filterMat[7] = 0.0 // always equal to 0
+                filterMat[11] = 0.0 // always equal to 0
+                filterMat[15] = 1.0 // always equal to 1
                 filterMat[12] = world[12]
                 filterMat[13] = world[13]
                 filterMat[14] = world[14]
@@ -204,7 +205,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
                 console.log(filterMat);
 
                 // set matrix of 'root' by detected 'world' matrix
-                setMatrix(root.matrix, trackedMatrix.interpolated);
+                setMatrix(root.matrix, filterMat);
         }
         renderer.render(scene, camera);
     };
