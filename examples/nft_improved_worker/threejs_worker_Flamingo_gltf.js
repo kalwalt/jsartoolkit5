@@ -53,7 +53,7 @@ function start( container, marker, video, input_width, input_height, canvas_draw
     var pw, ph;
     var ox, oy;
     var worker;
-    var camera_para = "./../examples/Data/camera_para-iPhone 5 rear 640x480 1.0m.dat";
+    var camera_para = "./../examples/Data/camera_para.dat";
 
     var canvas_process = document.createElement("canvas");
     var context_process = canvas_process.getContext("2d");
@@ -88,11 +88,19 @@ function start( container, marker, video, input_width, input_height, canvas_draw
             model.name = 'Flamingo';
             model.rotation.x = Math.PI/2;
 
-            var animation = gltf.animations[0];
-            var mixer = new THREE.AnimationMixer(model);
-            mixers.push(mixer);
-            var action = mixer.clipAction(animation);
-            action.play();
+            var animations = gltf.animations;
+            var mixer;
+            if ( animations && animations.length ) {
+
+              mixer = new THREE.AnimationMixer( model );
+
+              for (var a=0; a < animations.length; a++){
+                var animation = animations[a];
+                mixers.push(mixer);
+                var action = mixer.clipAction(animation);
+                action.play();
+              }
+            }
 
             root.matrixAutoUpdate = false;
             root.add(model);
@@ -109,22 +117,22 @@ function start( container, marker, video, input_width, input_height, canvas_draw
 
         sw = vw * sscale;
         sh = vh * sscale;
-        video.style.width = sw + "px";
+        /* video.style.width = sw + "px";
         video.style.height = sh + "px";
         container.style.width = sw + "px";
         container.style.height = sh + "px";
         canvas_draw.style.clientWidth = sw + "px";
         canvas_draw.style.clientHeight = sh + "px";
         canvas_draw.width = sw;
-        canvas_draw.height = sh;
+        canvas_draw.height = sh; */
         w = vw * pscale;
         h = vh * pscale;
         pw = Math.max(w, (h / 3) * 4);
         ph = Math.max(h, (w / 4) * 3);
         ox = (pw - w) / 2;
         oy = (ph - h) / 2;
-        canvas_process.style.clientWidth = pw + "px";
-        canvas_process.style.clientHeight = ph + "px";
+        // canvas_process.style.clientWidth = pw + "px";
+        // canvas_process.style.clientHeight = ph + "px";
         canvas_process.width = pw;
         canvas_process.height = ph;
 
@@ -195,8 +203,6 @@ function start( container, marker, video, input_width, input_height, canvas_draw
         } else {
             world = JSON.parse(msg.matrixGL_RH);
 
-            // ~nicolocarpignoli this is absolutely based on empirics. Have to test with other 3D models and
-            // other different images, possibly with different aspect ratio
             if (!window.firstPositioning) {
                 window.firstPositioning = true;
                 model.position.y = (msg.height / msg.dpi * 2.54 * 10)/2.0;
