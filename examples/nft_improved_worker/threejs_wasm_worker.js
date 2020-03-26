@@ -56,7 +56,7 @@ function start2(container, marker, video, input_width, input_height, canvas_draw
     var w, h;
     var pw, ph;
     var ox, oy;
-    var camera_para = './../../Data/camera_para-iPhone 5 rear 640x480 1.0m.dat'
+    var camera_para = './../../Data/camera_para.dat'
 
     var canvas_process = document.createElement('canvas');
     var context_process = canvas_process.getContext('2d');
@@ -80,9 +80,6 @@ function start2(container, marker, video, input_width, input_height, canvas_draw
     scene.add(root);
 
     sphere.material.flatShading;
-    sphere.position.z = 0;
-    sphere.position.x = 100;
-    sphere.position.y = 100;
     sphere.scale.set(200, 200, 200);
 
     root.matrixAutoUpdate = false;
@@ -97,22 +94,22 @@ function start2(container, marker, video, input_width, input_height, canvas_draw
 
         sw = vw * sscale;
         sh = vh * sscale;
-        video.style.width = sw + "px";
+        /* video.style.width = sw + "px";
         video.style.height = sh + "px";
         container.style.width = sw + "px";
         container.style.height = sh + "px";
         canvas_draw.style.clientWidth = sw + "px";
         canvas_draw.style.clientHeight = sh + "px";
         canvas_draw.width = sw;
-        canvas_draw.height = sh;
+        canvas_draw.height = sh; */
         w = vw * pscale;
         h = vh * pscale;
         pw = Math.max(w, h / 3 * 4);
         ph = Math.max(h, w / 4 * 3);
         ox = (pw - w) / 2;
         oy = (ph - h) / 2;
-        canvas_process.style.clientWidth = pw + "px";
-        canvas_process.style.clientHeight = ph + "px";
+        // canvas_process.style.clientWidth = pw + "px";
+        // canvas_process.style.clientHeight = ph + "px";
         canvas_process.width = pw;
         canvas_process.height = ph;
 
@@ -170,6 +167,16 @@ function start2(container, marker, video, input_width, input_height, canvas_draw
         world = null;
       } else {
         world = JSON.parse(msg.matrixGL_RH);
+
+        if (!window.firstPositioning) {
+            window.firstPositioning = true;
+            sphere.position.y = (msg.height / msg.dpi * 2.54 * 10)/2.0;
+            sphere.position.x = (msg.width / msg.dpi * 2.54 * 10)/2.0;
+        }
+
+        console.log("NFT width: ", msg.width);
+        console.log("NFT height: ", msg.height);
+        console.log("NFT dpi: ", msg.dpi);
       }
     };
 

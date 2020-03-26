@@ -49,7 +49,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     var pw, ph;
     var ox, oy;
     var worker;
-    var camera_para = './../examples/Data/camera_para-iPhone 5 rear 640x480 1.0m.dat'
+    var camera_para = './../examples/Data/camera_para.dat'
 
     var canvas_process = document.createElement('canvas');
     var context_process = canvas_process.getContext('2d');
@@ -77,13 +77,6 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     sphere.material.flatShading;
     sphere.scale.set(200, 200, 200);
 
-    var dimensions = new THREE.Box3().setFromObject(sphere);
-    console.log(dimensions);
-    objPositions = {
-        width: dimensions.max.x - dimensions.min.x,
-        height: dimensions.max.y - dimensions.min.y,
-    };
-
     root.matrixAutoUpdate = false;
     root.add(sphere);
 
@@ -96,22 +89,22 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
 
         sw = vw * sscale;
         sh = vh * sscale;
-        video.style.width = sw + "px";
+        /* video.style.width = sw + "px";
         video.style.height = sh + "px";
         container.style.width = sw + "px";
         container.style.height = sh + "px";
         canvas_draw.style.clientWidth = sw + "px";
         canvas_draw.style.clientHeight = sh + "px";
         canvas_draw.width = sw;
-        canvas_draw.height = sh;
+        canvas_draw.height = sh; */
         w = vw * pscale;
         h = vh * pscale;
         pw = Math.max(w, h / 3 * 4);
         ph = Math.max(h, w / 4 * 3);
         ox = (pw - w) / 2;
         oy = (ph - h) / 2;
-        canvas_process.style.clientWidth = pw + "px";
-        canvas_process.style.clientHeight = ph + "px";
+        // canvas_process.style.clientWidth = pw + "px";
+        // canvas_process.style.clientHeight = ph + "px";
         canvas_process.width = pw;
         canvas_process.height = ph;
 
@@ -140,10 +133,16 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
                     break;
                 }
                 case "endLoading": {
-                    if (msg.end == true)
-                        // removing loader page if present
-                        document.body.classList.remove("loading");
-                    document.getElementById("loading").remove();
+                  if (msg.end == true) {
+                      // removing loader page if present
+                      var loader = document.getElementById('loading');
+                      if (loader) {
+                          loader.querySelector('.loading-text').innerText = 'Start the tracking!';
+                          setTimeout(function(){
+                              loader.parentElement.removeChild(loader);
+                          }, 2000);
+                      }
+                  }
                     break;
                 }
                 case "found": {
@@ -168,12 +167,10 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
         } else {
             world = JSON.parse(msg.matrixGL_RH);
 
-            // ~nicolocarpignoli this is absolutely based on empirics. Have to test with other 3D models and
-            // other different images, possibly with different aspect ratio
             if (!window.firstPositioning) {
                 window.firstPositioning = true;
-                sphere.position.y = (msg.width / msg.dpi) * 1000 / objPositions.width;
-                sphere.position.x = (msg.height / msg.dpi) * 1000 / objPositions.height;
+                sphere.position.y = (msg.height / msg.dpi * 2.54 * 10)/2.0;
+                sphere.position.x = (msg.width / msg.dpi * 2.54 * 10)/2.0;
             }
 
             console.log("NFT width: ", msg.width);
