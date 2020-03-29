@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>A simple example with litescene.js</title>
+    <style type='text/css'>
+		html, body { width: 100%; height: 100%; overflow: hidden; }
+		* { margin: 0; padding: 0; }
+	  </style>
+    <script src="./js/third_party/litescene.js/externals/gl-matrix-min.js"></script>
+    <script src="./js/third_party/litescene.js/externals/litegl.min.js"></script>
+    <script src="./js/third_party/three.js/three.min.js"></script>
+    <script async src="../build/artoolkit.min.js"></script>
+    <script type="text/javascript">
+
+	function init()
+	{
+    var video = document.getElementById('video');
+    video.playsInline = true;
+    video.autoplay = true;
+    var canvas = document.getElementById('canvas');
+
+    navigator.getUserMedia  = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+    var tw = 640;
+    var th = 480;
+
+    var hdConstraints = {
+    	audio: false,
+    	video: {
+    		mandatory: {
+    			maxWidth: tw,
+    			maxHeight: th
+        	}
+      	}
+    };
+
+    if (navigator.getUserMedia) {
+    	navigator.getUserMedia(hdConstraints, success, errorCallback);
+    } else {
+    	errorCallback('');
+    }
+
+    function errorCallback(e) {
+    	console.log("Can't access user media", e);
+    }
+
+    var setProjectionMatrix = function(projectionMatrix, value) {
+      if (typeof projectionMatrix.elements.set === "function") {
+        projectionMatrix.elements.set(value);
+      } else {
+        projectionMatrix.elements = [].slice.call(value);
+      }
+    };
+
+    function success(stream) {
+    	console.log('success', stream);
+    	video.srcObject = stream;
+    	video.onclick = function() { video.play(); };
+    	video.play();
+
+    	var cameraParam = new ARCameraParam('Data/camera_para.dat');
+    	cameraParam.onload = function() {
+        var arController;
+        console.log(video.width);
+
+        //initialize litegl using the same canvas
+        var gl = GL.create({canvas: canvas, width: tw, height:th});
+        gl.animate();
+
+        //build the mesh
+        var mesh = GL.Mesh.plane({xy: true, width: tw, height: th});
+        var texture = GL.Texture.fromVideo(video, {minFilter: gl.NEAREST});
+        //create basic matrices for cameras and transformation
+        var proj = mat4.create();
+        var view = mat4.create();
+        var model = mat4.create();
+        var mvp = mat4.create();
+        var temp = mat4.create();
+
+        //set the camera position
+        mat4.perspective(proj, 45 * DEG2RAD, gl.canvas.width / gl.canvas.height, 0.1, 1000);
+        mat4.lookAt(view, [10,10,10], [0,0,0], [0,1,0]);
+
+        //basic phong shader
+    		var shader = new Shader('\
+    				precision highp float;\
+    				attribute vec3 a_vertex;\
+    				attribute vec3 a_normal;\
+    				attribute vec2 a_coord;\
+    				varying vec3 v_normal;\
+    				varying vec2 v_coord;\
+    				uniform mat4 u_mvp;\
+    				uniform mat4 u_model;\
+    				void main() {\
+    					v_coord = a_coord;\
+    					v_normal = (u_model * vec4(a_normal,0.0)).xyz;\
+    					gl_Position = u_mvp * vec4(a_vertex,1.0);\
+    				}\
+    				', '\
+    				precision highp float;\
+    				varying vec3 v_normal;\
+    				varying vec2 v_coord;\
+    				uniform vec3 u_lightvector;\
+    				uniform vec4 u_color;\
+    				uniform sampler2D u_texture;\
+    				void main() {\
+    				  vec3 N = normalize(v_normal);\
+    				  vec4 color = u_color * texture2D( u_texture, v_coord);\
+    				  gl_FragColor = color * max(0.0, dot(u_lightvector,N));\
+    				}\
+    			');
+
+
+    		var interval = setInterval(function() {
+    			if (!video.videoWidth)	return;
+
+      		//generic gl flags and settings
+      		gl.clearColor(0.1,0.1,0.1,1);
+      		gl.enable( gl.DEPTH_TEST );
+
+      		//rendering loop
+      		gl.ondraw = function()
+      		{
+      			gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+
+      			//LiteGL render
+      			gl.reset(); //clear state
+
+      			//create modelview and projection matrices
+      			mat4.multiply(temp,view,model);
+      			mat4.multiply(mvp,proj,temp);
+
+            //compute rotation matrix for normals
+            texture.bind(0);
+
+            //render mesh using the shader
+
+            shader.uniforms({
+                u_color: [1,1,1,1],
+                u_model: model,
+                u_texture: 0,
+                u_mvp: mvp
+              }).draw(mesh);
+          }
+
+      		//update loop
+      		gl.onupdate = function(dt)
+      		{
+      			//rotate cube
+      			mat4.rotateY(model,model,dt*0.2);
+      			//cube.rotateOnAxis( new THREE.Vector3(0,1,0), dt*0.2 );
+      		};
+
+    			if (!arController) {
+    				arController = new ARController(video, cameraParam);
+
+            //setProjectionMatrix(camera.projectionMatrix, arController.getCameraMatrix());
+    			};
+
+    			arController.process();
+    		}, 16);
+
+    	};
+
+
+  }
+}
+
+      </script>
+  </head>
+  <body>
+    <div id="app">
+        <video
+            loop
+            autoplay
+            muted
+            playsinline
+            id="video">
+        </video>
+
+        <canvas id="canvas"></canvas>
+    </div>
+      <script>
+            init();
+    </script>
+  </body>
+</html>
