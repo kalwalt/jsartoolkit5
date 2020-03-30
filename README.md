@@ -86,13 +86,13 @@ To prevent issues with Emscripten setup and to not have to maintain several buil
 
 jsartoolkit5 aim is to create a Javascript version of artoolkit5\. First, you need the artoolkit5 repository on your machine:
 
-1. Clone ARToolKit5 project to get the latest source files. From within jsartoolkit5 directory do `git submodule update --init`. If you already cloned ARToolKit5 to a different directory you can:
+2. Clone ARToolKit5 project to get the latest source files. From within jsartoolkit5 directory do `git submodule update --init`. If you already cloned ARToolKit5 to a different directory you can:
 
   - create a link in the `jsartoolkit5/emscripten/` directory that points to ARToolKit5 (`jsartoolkit5/emscripten/artoolkit5`)
   - or, set the `ARTOOLKIT5_ROOT` environment variable to point to your ARToolKit5 clone
   - or, change the `tools/makem.js` file to point to your artoolkit5 clone (line 20)
 
-2. Building
+3. Building
 
   1. Make sure `EMSCRIPTEN` env variable is set (e.g. `EMSCRIPTEN=/usr/lib/emsdk_portable/emscripten/master/ node tools/makem.js`
   2. Run `npm install`
@@ -100,7 +100,7 @@ jsartoolkit5 aim is to create a Javascript version of artoolkit5\. First, you ne
 
 During development, you can run `npm run watch`, it will rebuild the library everytime you change `./js/` directory. You can also run the script with the option `npm run build-local-no-libar` if you have already build libar.bc and you don't want to rebuild.
 
-1. The built ASM.js files are in `/build`. There's a build with debug symbols in `artoolkit.debug.js` and the optimized build with bundled JS API in `artoolkit.min.js`.
+4. The built ASM.js files are in `/build`. There's a build with debug symbols in `artoolkit.debug.js` and the optimized build with bundled JS API in `artoolkit.min.js`.
 
 ## ARToolKit JS API
 
