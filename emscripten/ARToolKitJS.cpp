@@ -59,6 +59,9 @@ struct arController {
 	int surfaceSetCount = 0; // Running NFT marker id
 	AR2SurfaceSetT      *surfaceSet[PAGES_MAX];
 	std::unordered_map<int, AR2SurfaceSetT*> surfaceSets;
+	int width_NFT;
+	int height_NFT;
+	int dpi_NFT;
 
 	ARdouble nearPlane = 0.0001;
 	ARdouble farPlane = 1000.0;
@@ -156,6 +159,9 @@ extern "C" {
 						id: 0,
 						error: -1,
 						found: 0,
+						width: 0,
+						height: 0,
+						dpi: 0,
 						pose: [0,0,0,0, 0,0,0,0, 0,0,0,0]
 					});
 				}
@@ -163,6 +169,9 @@ extern "C" {
 				markerInfo["id"] = $a[i++];
 				markerInfo["error"] = $a[i++];
 				markerInfo["found"] = 1;
+				markerInfo["width"] = $a[i++];
+				markerInfo["height"] = $a[i++];
+				markerInfo["dpi"] = $a[i++];
 				markerInfo["pose"][0] = $a[i++];
 				markerInfo["pose"][1] = $a[i++];
 				markerInfo["pose"][2] = $a[i++];
@@ -178,6 +187,9 @@ extern "C" {
 			},
 				markerIndex,
 				err,
+				arc->width_NFT,
+				arc->height_NFT,
+				arc->dpi_NFT,
 
 				trans[0][0],
 				trans[0][1],
@@ -203,6 +215,9 @@ extern "C" {
 						id: 0,
 						error: -1,
 						found: 0,
+						width: 0,
+						height: 0,
+						dpi: 0,
 						pose: [0,0,0,0, 0,0,0,0, 0,0,0,0]
 					});
 				}
@@ -210,6 +225,9 @@ extern "C" {
 				markerInfo["id"] = $a[i++];
 				markerInfo["error"] = -1;
 				markerInfo["found"] = 0;
+				markerInfo["width"] = 0;
+				markerInfo["height"] = 0;
+				markerInfo["dpi"] = 0;
 				markerInfo["pose"][0] = 0;
 				markerInfo["pose"][1] = 0;
 				markerInfo["pose"][2] = 0;
@@ -280,7 +298,7 @@ extern "C" {
 	}
 
 	int loadNFTMarker(arController *arc, int surfaceSetCount, const char* datasetPathname) {
-		int i, pageNo;
+		int i, pageNo, numIset, width, height, dpi;
 		KpmRefDataSet *refDataSet;
 
 		KpmHandle *kpmHandle = arc->kpmHandle;
@@ -313,6 +331,17 @@ extern "C" {
 		if ((arc->surfaceSet[surfaceSetCount] = ar2ReadSurfaceSet(datasetPathname, "fset", NULL)) == NULL ) {
 		    ARLOGe("Error reading data from %s.fset\n", datasetPathname);
 		}
+
+		numIset = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->num;
+		arc->width_NFT = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->scale[0]->xsize;
+		arc->height_NFT = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->scale[0]->ysize;
+		arc->dpi_NFT = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->scale[0]->dpi;
+
+		ARLOGi("NFT num. of ImageSet: %i\n", numIset);
+		ARLOGi("NFT marker width: %i\n", arc->width_NFT);
+		ARLOGi("NFT marker width: %i\n", arc->height_NFT);
+		ARLOGi("NFT marker dpi: %i\n", arc->dpi_NFT);
+
 		ARLOGi("  Done.\n");
 
 	if (surfaceSetCount == PAGES_MAX) exit(-1);

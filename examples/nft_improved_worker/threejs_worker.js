@@ -5,26 +5,26 @@ function isMobile() {
 var interpolationFactor = 24;
 
 var trackedMatrix = {
-  // for interpolation
-  delta: [
-      0,0,0,0,
-      0,0,0,0,
-      0,0,0,0,
-      0,0,0,0
-  ],
-  interpolated: [
-      0,0,0,0,
-      0,0,0,0,
-      0,0,0,0,
-      0,0,0,0
-  ]
+    // for interpolation
+    delta: [
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0
+    ],
+    interpolated: [
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0
+    ]
 }
 
 var markers = {
     "pinball": {
         width: 1637,
         height: 2048,
-        dpi: 250,
+        dpi: 215,
         url: "./examples/DataNFT/pinball",
     },
 };
@@ -49,7 +49,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     var pw, ph;
     var ox, oy;
     var worker;
-    var camera_para = './../examples/Data/camera_para-iPhone 5 rear 640x480 1.0m.dat'
+    var camera_para = './../examples/Data/camera_para.dat'
 
     var canvas_process = document.createElement('canvas');
     var context_process = canvas_process.getContext('2d');
@@ -72,16 +72,15 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
     var root = new THREE.Object3D();
     scene.add(root);
 
+    var objPositions;
+
     sphere.material.flatShading;
-    sphere.position.z = 0;
-    sphere.position.x = 100;
-    sphere.position.y = 100;
     sphere.scale.set(200, 200, 200);
 
     root.matrixAutoUpdate = false;
     root.add(sphere);
 
-    var load = function() {
+    var load = function () {
         vw = input_width;
         vh = input_height;
 
@@ -90,22 +89,22 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
 
         sw = vw * sscale;
         sh = vh * sscale;
-        video.style.width = sw + "px";
+        /* video.style.width = sw + "px";
         video.style.height = sh + "px";
         container.style.width = sw + "px";
         container.style.height = sh + "px";
         canvas_draw.style.clientWidth = sw + "px";
         canvas_draw.style.clientHeight = sh + "px";
         canvas_draw.width = sw;
-        canvas_draw.height = sh;
+        canvas_draw.height = sh; */
         w = vw * pscale;
         h = vh * pscale;
         pw = Math.max(w, h / 3 * 4);
         ph = Math.max(h, w / 4 * 3);
         ox = (pw - w) / 2;
         oy = (ph - h) / 2;
-        canvas_process.style.clientWidth = pw + "px";
-        canvas_process.style.clientHeight = ph + "px";
+        // canvas_process.style.clientWidth = pw + "px";
+        // canvas_process.style.clientHeight = ph + "px";
         canvas_process.width = pw;
         canvas_process.height = ph;
 
@@ -115,7 +114,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
 
         worker.postMessage({ type: "load", pw: pw, ph: ph, camera_para: camera_para, marker: '../' + marker.url });
 
-        worker.onmessage = function(ev) {
+        worker.onmessage = function (ev) {
             var msg = ev.data;
             switch (msg.type) {
                 case "loaded": {
@@ -134,11 +133,17 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
                     break;
                 }
                 case "endLoading": {
-                  if (msg.end == true)
-                    // removing loader page if present
-                    document.body.classList.remove("loading");
-                    document.getElementById("loading").remove();
-                  break;
+                  if (msg.end == true) {
+                      // removing loader page if present
+                      var loader = document.getElementById('loading');
+                      if (loader) {
+                          loader.querySelector('.loading-text').innerText = 'Start the tracking!';
+                          setTimeout(function(){
+                              loader.parentElement.removeChild(loader);
+                          }, 2000);
+                      }
+                  }
+                    break;
                 }
                 case "found": {
                     found(msg);
@@ -156,18 +161,28 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
 
     var world;
 
-    var found = function(msg) {
-      if (!msg) {
-        world = null;
-      } else {
-        world = JSON.parse(msg.matrixGL_RH);
-      }
+    var found = function (msg) {
+        if (!msg) {
+            world = null;
+        } else {
+            world = JSON.parse(msg.matrixGL_RH);
+
+            if (!window.firstPositioning) {
+                window.firstPositioning = true;
+                sphere.position.y = (msg.height / msg.dpi * 2.54 * 10)/2.0;
+                sphere.position.x = (msg.width / msg.dpi * 2.54 * 10)/2.0;
+            }
+
+            console.log("NFT width: ", msg.width);
+            console.log("NFT height: ", msg.height);
+            console.log("NFT dpi: ", msg.dpi);
+        }
     };
 
     var lasttime = Date.now();
     var time = 0;
 
-    var draw = function() {
+    var draw = function () {
         render_update();
         var now = Date.now();
         var dt = now - lasttime;
@@ -177,17 +192,18 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
         if (!world) {
             sphere.visible = false;
         } else {
-          sphere.visible = true;
-                // interpolate matrix
-                for (var i = 0; i < 16; i++) {
-                  trackedMatrix.delta[i] = world[i] - trackedMatrix.interpolated[i];
-                  trackedMatrix.interpolated[i] =
+            sphere.visible = true;
+
+            // interpolate matrix
+            for (var i = 0; i < 16; i++) {
+                trackedMatrix.delta[i] = world[i] - trackedMatrix.interpolated[i];
+                trackedMatrix.interpolated[i] =
                     trackedMatrix.interpolated[i] +
                     trackedMatrix.delta[i] / interpolationFactor;
-                }
+            }
 
-                // set matrix of 'root' by detected 'world' matrix
-                setMatrix(root.matrix, trackedMatrix.interpolated);
+            // set matrix of 'root' by detected 'world' matrix
+            setMatrix(root.matrix, trackedMatrix.interpolated);
         }
         renderer.render(scene, camera);
     };
@@ -200,7 +216,7 @@ function start(container, marker, video, input_width, input_height, canvas_draw,
         var imageData = context_process.getImageData(0, 0, pw, ph);
         worker.postMessage({ type: "process", imagedata: imageData }, [imageData.data.buffer]);
     }
-    var tick = function() {
+    var tick = function () {
         draw();
         requestAnimationFrame(tick);
     };
