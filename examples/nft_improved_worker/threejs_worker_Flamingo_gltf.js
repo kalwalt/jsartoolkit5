@@ -209,6 +209,12 @@ function start( container, marker, video, input_width, input_height, canvas_draw
                 model.position.x = (msg.width / msg.dpi * 2.54 * 10)/2.0;
             }
 
+            window.addEventListener("orientationchange", function() {
+            	// Announce the new orientation number
+              console.log(screen.orientation);
+              model.updateWorldMatrix(true, true);
+            }, false);
+
             console.log("NFT width: ", msg.width);
             console.log("NFT height: ", msg.height);
             console.log("NFT dpi: ", msg.dpi);
