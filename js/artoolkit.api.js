@@ -577,22 +577,22 @@
 		@param {function} onError - The error callback. Called with the encountered error if the load fails.
 	*/
     ARController.prototype.loadNFTMarker = function (markerURL, onSuccess, onError) {
-        var self = this;
-        if (markerURL) {
-          return artoolkit.addNFTMarker(this.id, markerURL, function (id) {
-              self.nftMarkerCount = id + 1;
-              onSuccess(id);
-          }, onError);
-        } else {
-          if (onError) {
-              onError("Marker URL needs to be defined and not equal empty string!");
-          }
-          else {
-              console.error("Marker URL needs to be defined and not equal empty string!");
-          }
-        }
+       var self = this;
+       if (markerURL) {
+         return artoolkit.addNFTMarker(this.id, markerURL, function (nft) {
+             self.nftMarkerCount = nft.id + 1;
+             onSuccess(nft);
+         }, onError);
+       } else {
+         if (onError) {
+             onError("Marker URL needs to be defined and not equal empty string!");
+         }
+         else {
+             console.error("Marker URL needs to be defined and not equal empty string!");
+         }
+       }
 
-    };
+  };
 
 	/**
 		Loads a multimarker from the given URL and calls the onSuccess callback with the UID of the marker.
@@ -1879,20 +1879,20 @@
     }
 
     function addNFTMarker(arId, url, callback, onError) {
-        var mId = marker_count++;
-        var prefix = '/markerNFT_' + mId;
-        var filename1 = prefix + '.fset';
-        var filename2 = prefix + '.iset';
-        var filename3 = prefix + '.fset3';
-        ajax(url + '.fset', filename1, function () {
-            ajax(url + '.iset', filename2, function () {
-                ajax(url + '.fset3', filename3, function () {
-                    var id = Module._addNFTMarker(arId, prefix);
-                    if (callback) callback(id);
-                }, function (errorNumber) { if (onError) onError(errorNumber) });
-            }, function (errorNumber) { if (onError) onError(errorNumber) });
-        }, function (errorNumber) { if (onError) onError(errorNumber) });
-    }
+       var mId = marker_count++;
+       var prefix = '/markerNFT_' + mId;
+       var filename1 = prefix + '.fset';
+       var filename2 = prefix + '.iset';
+       var filename3 = prefix + '.fset3';
+       ajax(url + '.fset', filename1, function () {
+           ajax(url + '.iset', filename2, function () {
+               ajax(url + '.fset3', filename3, function () {
+                   var nftMarker = Module._addNFTMarker(arId, prefix);
+                   if (callback) callback(nftMarker);
+               }, function (errorNumber) { if (onError) onError(errorNumber); });
+           }, function (errorNumber) { if (onError) onError(errorNumber); });
+       }, function (errorNumber) { if (onError) onError(errorNumber); });
+   }
 
     function bytesToString(array) {
         return String.fromCharCode.apply(String, array);

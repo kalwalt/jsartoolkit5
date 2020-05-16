@@ -33,6 +33,13 @@ struct multi_marker {
 	ARMultiMarkerInfoT *multiMarkerHandle;
 };
 
+struct nftMarker {
+	int id_NFT;
+	int width_NFT;
+	int height_NFT;
+	int dpi_NFT;
+};
+
 struct arController {
 	int id;
 
@@ -59,6 +66,8 @@ struct arController {
 	int surfaceSetCount = 0; // Running NFT marker id
 	AR2SurfaceSetT      *surfaceSet[PAGES_MAX];
 	std::unordered_map<int, AR2SurfaceSetT*> surfaceSets;
+	// nftMarker struct inside arController
+	nftMarker nft;
 
 	ARdouble nearPlane = 0.0001;
 	ARdouble farPlane = 1000.0;
@@ -280,7 +289,7 @@ extern "C" {
 	}
 
 	int loadNFTMarker(arController *arc, int surfaceSetCount, const char* datasetPathname) {
-		int i, pageNo;
+		int i, pageNo, numIset;
 		KpmRefDataSet *refDataSet;
 
 		KpmHandle *kpmHandle = arc->kpmHandle;
@@ -313,6 +322,17 @@ extern "C" {
 		if ((arc->surfaceSet[surfaceSetCount] = ar2ReadSurfaceSet(datasetPathname, "fset", NULL)) == NULL ) {
 		    ARLOGe("Error reading data from %s.fset\n", datasetPathname);
 		}
+
+		numIset = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->num;
+		arc->nft.width_NFT = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->scale[0]->xsize;
+		arc->nft.height_NFT = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->scale[0]->ysize;
+		arc->nft.dpi_NFT = arc->surfaceSet[surfaceSetCount]->surface[0].imageSet->scale[0]->dpi;
+
+		ARLOGi("NFT num. of ImageSet: %i\n", numIset);
+		ARLOGi("NFT marker width: %i\n", arc->nft.width_NFT);
+		ARLOGi("NFT marker height: %i\n", arc->nft.height_NFT);
+		ARLOGi("NFT marker dpi: %i\n", arc->nft.dpi_NFT);
+
 		ARLOGi("  Done.\n");
 
 	if (surfaceSetCount == PAGES_MAX) exit(-1);
@@ -512,20 +532,30 @@ extern "C" {
 		return arc->patt_id;
 	}
 
-	int addNFTMarker(int id, std::string datasetPathname) {
-		if (arControllers.find(id) == arControllers.end()) { return -1; }
+	/*****************
+	* Marker loading *
+	*****************/
+
+	nftMarker addNFTMarker(int id, std::string datasetPathname) {
+		nftMarker nft;
+		if (arControllers.find(id) == arControllers.end()) { return nft; }
 		arController *arc = &(arControllers[id]);
 
 		// Load marker(s).
 		int patt_id = arc->surfaceSetCount;
 		if (!loadNFTMarker(arc, patt_id, datasetPathname.c_str())) {
 			ARLOGe("ARToolKitJS(): Unable to set up NFT marker.\n");
-			return -1;
+			return nft;
 		}
 
 		arc->surfaceSetCount++;
 
-		return patt_id;
+		nft.id_NFT = patt_id;
+    nft.width_NFT = arc->nft.width_NFT;
+    nft.height_NFT = arc->nft.height_NFT;
+    nft.dpi_NFT = arc->nft.dpi_NFT;
+
+		return nft;
 	}
 
 	int addMultiMarker(int id, std::string patt_name) {
